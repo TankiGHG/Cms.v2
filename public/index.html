@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DJ JAGGER - Terminal</title>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --text-color: #0f0;
+            --font-family: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        pre {
+            font-family: var(--font-family);
+            white-space: pre-wrap;
+            margin-bottom: 20px;
+        }
+
+        .ascii-art {
+            color: #fff;
+            text-shadow: 0 0 5px #fff;
+            font-size: 10px; /* Adjust for mobile/desktop if needed */
+        }
+
+        h1, h2 {
+            font-weight: normal;
+            border-bottom: 1px dashed var(--text-color);
+            padding-bottom: 5px;
+            margin-top: 40px;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1em;
+            background-color: var(--text-color);
+            animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 15px;
+        }
+
+        .prompt {
+            color: #fff;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        input, textarea, button {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--text-color);
+            font-family: var(--font-family);
+            padding: 10px;
+            outline: none;
+        }
+
+        input:focus, textarea:focus {
+            box-shadow: 0 0 5px var(--text-color);
+        }
+
+        button {
+            cursor: pointer;
+            width: fit-content;
+        }
+
+        button:hover {
+            background-color: var(--text-color);
+            color: var(--bg-color);
+        }
+
+        .system-msg {
+            margin-top: 10px;
+            font-style: italic;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <pre class="ascii-art">
+  _____       _        _         _____  _____  ______  _____
+ |  __ \     | |      | |  /\   / ____|/ ____||  ____||  __ \
+ | |  | |    | |      | | /  \ | |  __| |  __ | |__   | |__) |
+ | |  | |_   | |  _   | |/ /\ \| | |_ | | |_ ||  __|  |  _  /
+ | |__| | |__| | | |__| / ____ \ |__| | |__| || |____ | | \ \
+ |_____/ \____/   \____/_/    \_\_____|\_____||______||_|  \_\
+    </pre>
+
+    <div><span class="prompt">guest@jagger-system:~$</span> ./init_system.sh</div>
+    <div>System initialized. Welcome to the official DJ JAGGER terminal.</div>
+
+    <h2><span class="prompt">guest@jagger-system:~$</span> cat future_gigs.txt<span class="cursor"></span></h2>
+    <div id="gigs-container">
+        <div class="system-msg">[ Fetching data from mainframe... ]</div>
+    </div>
+
+    <h2><span class="prompt">guest@jagger-system:~$</span> ls -l /mixes/<span class="cursor"></span></h2>
+    <div id="mixes-container">
+        <div class="system-msg">[ Fetching data from mainframe... ]</div>
+    </div>
+
+    <h2><span class="prompt">guest@jagger-system:~$</span> ./book_dj.sh<span class="cursor"></span></h2>
+    <form id="booking-form">
+        <label for="name">NAME:</label>
+        <input type="text" id="name" name="name" required placeholder="Enter your name">
+
+        <label for="email">EMAIL:</label>
+        <input type="email" id="email" name="email" required placeholder="Enter your email">
+
+        <label for="event_details">EVENT DETAILS:</label>
+        <input type="text" id="event_details" name="event_details" placeholder="Date, Location, etc.">
+
+        <label for="message">MESSAGE:</label>
+        <textarea id="message" name="message" rows="4" placeholder="Additional info..."></textarea>
+
+        <button type="submit">[ EXECUTE BOOKING ]</button>
+    </form>
+    <div id="form-feedback" class="system-msg"></div>
+
+</div>
+
+<script>
+    const API_URL = '/api';
+
+    async function fetchGigs() {
+        const container = document.getElementById('gigs-container');
+        try {
+            const response = await fetch(`${API_URL}/gigs`);
+            const data = await response.json();
+
+            if (data.length === 0) {
+                container.innerHTML = '<div>No upcoming gigs found in database.</div>';
+                return;
+            }
+
+            let html = '<ul>';
+            data.forEach(gig => {
+                html += `<li>[${gig.date}] ${gig.location} - ${gig.genre || 'N/A'}`;
+                if (gig.ticket_link) {
+                    html += ` (<a href="${gig.ticket_link}" target="_blank" style="color:var(--text-color);">Tickets</a>)`;
+                }
+                html += '</li>';
+            });
+            html += '</ul>';
+            container.innerHTML = html;
+        } catch (error) {
+            container.innerHTML = '<div style="color:red;">[ERROR] Connection refused.</div>';
+        }
+    }
+
+    async function fetchMixes() {
+        const container = document.getElementById('mixes-container');
+        try {
+            const response = await fetch(`${API_URL}/mixes`);
+            const data = await response.json();
+
+            if (data.length === 0) {
+                container.innerHTML = '<div>No mixes found in directory.</div>';
+                return;
+            }
+
+            let html = '<ul>';
+            data.forEach(mix => {
+                html += `<li>[${mix.release_date || 'UNKNOWN'}] <a href="${mix.soundcloud_url}" target="_blank" style="color:var(--text-color);">${mix.title}</a></li>`;
+            });
+            html += '</ul>';
+            container.innerHTML = html;
+        } catch (error) {
+            container.innerHTML = '<div style="color:red;">[ERROR] Connection refused.</div>';
+        }
+    }
+
+    document.getElementById('booking-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const feedback = document.getElementById('form-feedback');
+        feedback.innerText = '[ Sending transmission... ]';
+        feedback.style.color = 'var(--text-color)';
+
+        const formData = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            event_details: document.getElementById('event_details').value,
+            message: document.getElementById('message').value,
+        };
+
+        try {
+            const response = await fetch(`${API_URL}/booking`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            const result = await response.json();
+
+            if (response.ok) {
+                feedback.innerText = '[ SUCCESS ] ' + result.message;
+                document.getElementById('booking-form').reset();
+            } else {
+                feedback.innerText = '[ ERROR ] ' + (result.error || 'Transmission failed.');
+                feedback.style.color = 'red';
+            }
+        } catch (error) {
+            feedback.innerText = '[ CRITICAL ERROR ] Uplink offline.';
+            feedback.style.color = 'red';
+        }
+    });
+
+    // Initialize
+    fetchGigs();
+    fetchMixes();
+</script>
+</body>
+</html>
