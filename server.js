@@ -9,10 +9,25 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Basic Auth setup
+const adminUsers = {};
+adminUsers[process.env.ADMIN_USER] = process.env.ADMIN_PASS;
+
+const adminAuth = basicAuth({
+    users: adminUsers,
+    challenge: true,
+    unauthorizedResponse: 'Unauthorized Access'
+});
+
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve the admin directory protected by Basic Auth
+app.use('/admin', adminAuth, express.static(path.join(__dirname, 'public/admin')));
+
+// Serve the rest of the public files without auth
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Database setup
@@ -70,16 +85,6 @@ const transporter = nodemailer.createTransport({
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS
     }
-});
-
-// Basic Auth setup for /api/admin
-const adminUsers = {};
-adminUsers[process.env.ADMIN_USER] = process.env.ADMIN_PASS;
-
-const adminAuth = basicAuth({
-    users: adminUsers,
-    challenge: true,
-    unauthorizedResponse: 'Unauthorized Access'
 });
 
 // --- PUBLIC API ROUTES ---

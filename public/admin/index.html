@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JAGGER SYS-ADMIN</title>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --text-color: #0f0;
+            --danger-color: #f00;
+            --font-family: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1, h2 {
+            font-weight: normal;
+            border-bottom: 1px dashed var(--text-color);
+            padding-bottom: 5px;
+            margin-top: 40px;
+            text-transform: uppercase;
+        }
+
+        .prompt {
+            color: #fff;
+        }
+
+        /* Forms */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+            max-width: 500px;
+        }
+
+        input, textarea, button {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--text-color);
+            font-family: var(--font-family);
+            padding: 10px;
+            outline: none;
+        }
+
+        input:focus, textarea:focus {
+            box-shadow: 0 0 5px var(--text-color);
+        }
+
+        button {
+            cursor: pointer;
+            width: fit-content;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            background-color: var(--text-color);
+            color: var(--bg-color);
+        }
+
+        .btn-danger {
+            border-color: var(--danger-color);
+            color: var(--danger-color);
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger-color);
+            color: var(--bg-color);
+        }
+
+        /* Lists and Tables */
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #333;
+            padding: 10px;
+        }
+
+        .system-msg {
+            margin-top: 10px;
+            font-style: italic;
+            opacity: 0.8;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid var(--text-color);
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            color: #fff;
+        }
+
+        .separator {
+            margin: 40px 0;
+            color: #555;
+            text-align: center;
+            letter-spacing: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1><span class="prompt">root@jagger-system:~$</span> ./open_dashboard.sh</h1>
+    <div class="system-msg">ACCESS GRANTED. WELCOME ADMIN.</div>
+
+    <div class="separator">==================================================</div>
+
+    <h2><span class="prompt">root@jagger-system:~$</span> view --bookings</h2>
+    <div id="bookings-container">
+        <div class="system-msg">[ Fetching incoming transmissions... ]</div>
+    </div>
+
+    <div class="separator">==================================================</div>
+
+    <h2><span class="prompt">root@jagger-system:~$</span> gigs --manage</h2>
+    <div id="gigs-container">
+        <div class="system-msg">[ Fetching gig database... ]</div>
+    </div>
+
+    <div class="separator">==================================================</div>
+
+    <h2><span class="prompt">root@jagger-system:~$</span> gigs --create</h2>
+    <form id="create-gig-form">
+        <label for="date">DATE (e.g. 2024-12-31):</label>
+        <input type="text" id="date" required placeholder="YYYY-MM-DD">
+
+        <label for="location">LOCATION:</label>
+        <input type="text" id="location" required placeholder="Club XYZ, Berlin">
+
+        <label for="genre">GENRE (Optional):</label>
+        <input type="text" id="genre" placeholder="Techno / House">
+
+        <label for="ticket_link">TICKET LINK (Optional):</label>
+        <input type="url" id="ticket_link" placeholder="https://...">
+
+        <button type="submit">[ INJECT GIG ]</button>
+        <div id="gig-feedback" class="system-msg"></div>
+    </form>
+
+    <div class="separator">==================================================</div>
+</div>
+
+<script>
+    // Because the HTML itself is protected by Basic Auth,
+    // the browser automatically sends the Basic Auth headers for all fetch requests to /api/admin/...
+    const API_URL = '/api/admin';
+
+    async function fetchBookings() {
+        const container = document.getElementById('bookings-container');
+        try {
+            const response = await fetch(`${API_URL}/bookings`);
+            const data = await response.json();
+
+            if (data.length === 0) {
+                container.innerHTML = '<div>[ NO INCOMING BOOKINGS DETECTED ]</div>';
+                return;
+            }
+
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>DATE</th>
+                            <th>NAME</th>
+                            <th>EMAIL</th>
+                            <th>DETAILS</th>
+                            <th>MESSAGE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.forEach(b => {
+                html += `
+                    <tr>
+                        <td>${new Date(b.created_at).toLocaleString()}</td>
+                        <td>${escapeHtml(b.name)}</td>
+                        <td>${escapeHtml(b.email)}</td>
+                        <td>${escapeHtml(b.event_details || '-')}</td>
+                        <td>${escapeHtml(b.message || '-')}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        } catch (err) {
+            container.innerHTML = '<div style="color:var(--danger-color);">[ ERROR RETRIEVING BOOKINGS ]</div>';
+        }
+    }
+
+    async function fetchGigs() {
+        const container = document.getElementById('gigs-container');
+        try {
+            const response = await fetch('/api/gigs'); // Can use public route to fetch
+            const data = await response.json();
+
+            if (data.length === 0) {
+                container.innerHTML = '<div>[ NO GIGS FOUND IN DATABASE ]</div>';
+                return;
+            }
+
+            let html = '<ul>';
+            data.forEach(gig => {
+                html += `
+                    <li>
+                        <div>
+                            <strong>[${escapeHtml(gig.date)}]</strong> ${escapeHtml(gig.location)}
+                            <span style="color:#888;">| ${escapeHtml(gig.genre || 'N/A')}</span>
+                        </div>
+                        <button class="btn-danger" onclick="deleteGig(${gig.id})">[ DELETE ]</button>
+                    </li>
+                `;
+            });
+            html += '</ul>';
+            container.innerHTML = html;
+        } catch (err) {
+            container.innerHTML = '<div style="color:var(--danger-color);">[ ERROR RETRIEVING GIGS ]</div>';
+        }
+    }
+
+    async function deleteGig(id) {
+        if (!confirm('WARNING: PERMANENTLY DELETE GIG?')) return;
+
+        try {
+            const response = await fetch(`${API_URL}/gigs/${id}`, { method: 'DELETE' });
+            if (response.ok) {
+                fetchGigs(); // Refresh list
+            } else {
+                alert('[ ERROR ] Failed to delete.');
+            }
+        } catch (err) {
+            alert('[ CRITICAL ERROR ] Deletion sequence failed.');
+        }
+    }
+
+    document.getElementById('create-gig-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const feedback = document.getElementById('gig-feedback');
+        feedback.innerText = '[ PROCESSING... ]';
+        feedback.style.color = 'var(--text-color)';
+
+        const payload = {
+            date: document.getElementById('date').value,
+            location: document.getElementById('location').value,
+            genre: document.getElementById('genre').value,
+            ticket_link: document.getElementById('ticket_link').value
+        };
+
+        try {
+            const response = await fetch(`${API_URL}/gigs`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                feedback.innerText = '[ SUCCESS ] Gig injected into mainframe.';
+                document.getElementById('create-gig-form').reset();
+                fetchGigs(); // Refresh list
+            } else {
+                feedback.innerText = '[ ERROR ] Injection rejected.';
+                feedback.style.color = 'var(--danger-color)';
+            }
+        } catch (err) {
+            feedback.innerText = '[ CRITICAL ERROR ] Connection lost.';
+            feedback.style.color = 'var(--danger-color)';
+        }
+    });
+
+    // Utility to prevent XSS
+    function escapeHtml(unsafe) {
+        if (!unsafe) return '';
+        return unsafe
+            .toString()
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // Init
+    fetchBookings();
+    fetchGigs();
+</script>
+</body>
+</html>
