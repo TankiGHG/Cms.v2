@@ -124,13 +124,14 @@ app.post('/api/booking', (req, res) => {
             return res.status(500).json({ error: 'Failed to save booking.' });
         }
 
-        // Send email
-        const mailOptions = {
-            from: process.env.SMTP_FROM,
-            to: process.env.SMTP_TO,
-            replyTo: email,
-            subject: `New Booking Request from ${name}`,
-            text: `
+        // Send email (Wrapped in try/catch to ensure server stability even if nodemailer fails unexpectedly)
+        try {
+            const mailOptions = {
+                from: process.env.SMTP_FROM,
+                to: process.env.SMTP_TO,
+                replyTo: email,
+                subject: `New Booking Request from ${name}`,
+                text: `
 You have received a new booking request.
 
 Name: ${name}
@@ -139,18 +140,20 @@ Event Details: ${event_details || 'N/A'}
 
 Message:
 ${message || 'N/A'}
-            `
-        };
+                `
+            };
 
-        transporter.sendMail(mailOptions, (mailErr, info) => {
-            if (mailErr) {
-                console.error('Error sending email:', mailErr);
-                // We still return 200 because DB save was successful, but log the email error.
-                // Depending on requirements, you might want to return an error here instead.
-                return res.status(200).json({ success: true, message: 'Booking saved, but failed to send email.' });
-            }
-            res.status(200).json({ success: true, message: 'Booking saved and email sent.' });
-        });
+            transporter.sendMail(mailOptions, (mailErr, info) => {
+                if (mailErr) {
+                    console.error('Error sending email:', mailErr.message);
+                    return res.status(201).json({ success: true, message: 'Booking saved, but failed to send email notification.' });
+                }
+                res.status(201).json({ success: true, message: 'Booking saved and email sent.' });
+            });
+        } catch (mailException) {
+            console.error('Critical Error in mail transporter:', mailException);
+            return res.status(201).json({ success: true, message: 'Booking saved, but mail service is currently unavailable.' });
+        }
     });
 });
 
@@ -169,7 +172,7 @@ app.post('/api/admin/gigs', (req, res) => {
     const query = `INSERT INTO gigs (date, location, genre, ticket_link) VALUES (?, ?, ?, ?)`;
     db.run(query, [date, location, genre, ticket_link], function(err) {
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ id: this.lastID, success: true });
+        res.status(201).json({ id: this.lastID, success: true });
     });
 });
 
@@ -193,6 +196,26 @@ app.get('/api/admin/bookings', (req, res) => {
 });
 
 // Start the server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
+// Graceful Shutdown to prevent memory leaks and database corruption
+function gracefulShutdown(signal) {
+    console.log(`\nReceived ${signal}. Closing server gracefully...`);
+    server.close(() => {
+        console.log('HTTP server closed.');
+        // Close SQLite connection safely
+        db.close((err) => {
+            if (err) {
+                console.error('Error closing the database connection:', err.message);
+                process.exit(1);
+            }
+            console.log('Database connection closed.');
+            process.exit(0);
+        });
+    });
+}
+
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
