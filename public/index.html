@@ -3,155 +3,429 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DJ JAGGER - Terminal</title>
+    <title>DJ JAGGER - Official Website</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-color: #050505;
-            --text-color: #0f0;
-            --font-family: 'Courier New', Courier, monospace;
+        /* Edge/Chromium: clip schneidet stärker ab als „hidden“ (kein horizontales Scrollen durch Schatten/Subpixel) */
+        html {
+            overflow-x: clip;
+            max-width: 100%;
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
         }
 
+        @supports not (overflow: clip) {
+            html {
+                overflow-x: hidden;
+            }
+        }
+
+        /* Body / Vorschau / Admin-Link (liegen außerhalb .dj-page) */
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: var(--font-family);
             margin: 0;
-            padding: 20px;
-            overflow-x: hidden;
+            min-height: 100vh;
+            min-height: 100dvh;
+            background: #050505;
+            overflow-x: clip;
+            max-width: 100%;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
+        @supports not (overflow: clip) {
+            body {
+                overflow-x: hidden;
+            }
         }
 
-        pre {
-            font-family: var(--font-family);
-            white-space: pre-wrap;
-            margin-bottom: 20px;
+        #page-root {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            overflow-x: clip;
+            min-width: 0;
         }
 
-        .ascii-art {
-            color: #fff;
-            text-shadow: 0 0 5px #fff;
-            font-size: 10px; /* Adjust for mobile/desktop if needed */
+        @supports not (overflow: clip) {
+            #page-root {
+                overflow-x: hidden;
+            }
         }
 
-        h1, h2 {
-            font-weight: normal;
-            border-bottom: 1px dashed var(--text-color);
-            padding-bottom: 5px;
-            margin-top: 40px;
-        }
-
-        .cursor {
-            display: inline-block;
-            width: 10px;
-            height: 1em;
-            background-color: var(--text-color);
-            animation: blink 1s step-end infinite;
-            vertical-align: text-bottom;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-
-        ul {
-            list-style-type: none;
+        /* Gemeinsame Styles — geräteadaptiv, Farben über CSS-Variablen */
+        * {
+            margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+            scroll-behavior: smooth;
         }
 
-        li {
-            margin-bottom: 15px;
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                scroll-behavior: auto;
+            }
+            .dj-page .hero h1 {
+                animation: none;
+            }
+            .dj-page .gig-card,
+            .dj-page .btn {
+                transition: none;
+            }
         }
 
-        .prompt {
+        .dj-page {
+            --primary-color: #ff3366;
+            --secondary-color: #7b2cbf;
+            --page-bg: #050505;
+            --surface-bg: #080808;
+            --page-pad-x: clamp(12px, 4vw, 28px);
+            --section-pad-y: clamp(48px, 10vw, 100px);
+            background-color: var(--page-bg);
+            color: #ffffff;
+            overflow-x: clip;
+            min-height: 100vh;
+            min-height: 100dvh;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            padding-left: env(safe-area-inset-left, 0px);
+            padding-right: env(safe-area-inset-right, 0px);
+            padding-bottom: max(0px, env(safe-area-inset-bottom, 0px));
+        }
+
+        @supports not (overflow: clip) {
+            .dj-page {
+                overflow-x: hidden;
+            }
+        }
+
+        /* Navigation Glassmorphism */
+        .dj-navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(5, 5, 5, 0.7);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 15px var(--page-pad-x);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
             color: #fff;
+            font-weight: 900;
+            font-size: 1.5rem;
+            text-decoration: none;
+            letter-spacing: 2px;
         }
 
-        form {
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-links ul { list-style: none; display: flex; gap: 20px; }
+        .nav-links a { color: #ccc; text-decoration: none; font-weight: 600; transition: color 0.3s; }
+        .nav-links a:hover { color: var(--primary-color); }
+        .nav-btn { padding: 8px 20px; font-size: 0.9rem; min-width: auto; min-height: auto; }
+
+        .dj-page .hero {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: clip;
+            min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-top: 20px;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: max(24px, env(safe-area-inset-top, 0px)) var(--page-pad-x) 32px;
+            background: linear-gradient(to bottom, rgba(5, 5, 5, 0.35), rgba(5, 5, 5, 0.92)),
+                var(--hero-bg-image, url('https://images.unsplash.com/photo-1516873240891-4bf014598ab4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')) center/cover;
+            background-attachment: scroll;
         }
 
-        input, textarea, button {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            border: 1px solid var(--text-color);
-            font-family: var(--font-family);
-            padding: 10px;
-            outline: none;
+        .dj-page .hero h1 {
+            font-size: clamp(1.85rem, 6.5vw + 0.5rem, 5rem);
+            font-weight: 900;
+            letter-spacing: clamp(0.5px, 0.55vw, 6px);
+            text-transform: uppercase;
+            text-shadow: 0 0 16px rgba(255, 51, 102, 0.45);
+            margin-bottom: clamp(8px, 2vw, 14px);
+            line-height: 1.05;
+            max-width: 100%;
+            width: 100%;
+            box-sizing: border-box;
+            word-wrap: break-word;
+            overflow-wrap: anywhere;
+            animation: pulseGlow 3s infinite alternate;
         }
 
-        input:focus, textarea:focus {
-            box-shadow: 0 0 5px var(--text-color);
+        .dj-page .hero p.genres {
+            font-size: clamp(0.85rem, 2.2vw + 0.35rem, 1.2rem);
+            font-weight: 300;
+            letter-spacing: clamp(1px, 0.35vw, 3px);
+            margin-bottom: clamp(24px, 5vw, 40px);
+            color: #d1d1d1;
+            max-width: min(36rem, 100%);
+            line-height: 1.45;
         }
 
-        button {
+        .dj-page .btn {
+            background: transparent;
+            color: #fff;
+            border: 2px solid var(--primary-color);
+            padding: max(14px, 0.9em) clamp(22px, 5vw, 40px);
+            font-size: clamp(0.85rem, 1.8vw + 0.4rem, 1.1rem);
+            font-weight: 600;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: clamp(1px, 0.25vw, 2px);
             cursor: pointer;
-            width: fit-content;
+            border-radius: 50px;
+            transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+            display: inline-block;
+            min-height: 44px;
+            min-width: min(100%, 12rem);
+            line-height: 1.2;
+            text-align: center;
         }
 
-        button:hover {
-            background-color: var(--text-color);
-            color: var(--bg-color);
+        @media (hover: hover) and (pointer: fine) {
+            .dj-page .btn:hover {
+                background: var(--primary-color);
+                box-shadow: 0 0 25px var(--primary-color);
+                transform: scale(1.05);
+            }
         }
 
-        .system-msg {
-            margin-top: 10px;
-            font-style: italic;
-            opacity: 0.8;
+        .dj-page .gigs-section {
+            padding: var(--section-pad-y) 0;
+            text-align: center;
+            background-color: var(--page-bg);
+        }
+
+        .dj-page .section-title {
+            font-size: clamp(1.35rem, 4vw + 0.5rem, 2.5rem);
+            font-weight: 900;
+            margin-bottom: clamp(28px, 6vw, 50px);
+            text-transform: uppercase;
+            letter-spacing: clamp(1px, 0.4vw, 2px);
+            padding: 0 var(--page-pad-x);
+            line-height: 1.15;
+            max-width: 100%;
+        }
+
+        .dj-page .section-title span {
+            color: var(--primary-color);
+        }
+
+        .dj-page .gigs-container {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(12px, 3vw, 20px);
+            width: 100%;
+            max-width: min(800px, 100%);
+            margin: 0 auto;
+            padding: 0 var(--page-pad-x);
+        }
+
+        .dj-page .gig-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: clamp(16px, 4vw, 25px);
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: clamp(10px, 2vw, 16px);
+            transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
+            text-align: left;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            overflow-x: clip;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .dj-page .gig-card:hover {
+                transform: translateY(-6px) scale(1.01);
+                border-color: rgba(255, 51, 102, 0.6);
+                box-shadow: 0 15px 35px rgba(255, 51, 102, 0.15);
+            }
+        }
+
+        .dj-page .gig-date {
+            font-size: clamp(1rem, 2.2vw + 0.4rem, 1.2rem);
+            font-weight: 900;
+            color: #fff;
+            flex: 1 1 22%;
+            min-width: 0;
+        }
+
+        .dj-page .gig-location {
+            font-size: clamp(0.9rem, 1.8vw + 0.35rem, 1.1rem);
+            font-weight: 600;
+            color: #ddd;
+            flex: 2 1 40%;
+            min-width: 0;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        .dj-page .gig-genre {
+            font-size: clamp(0.75rem, 1.5vw + 0.25rem, 0.9rem);
+            font-weight: 600;
+            color: var(--primary-color);
+            background: rgba(255, 51, 102, 0.1);
+            padding: 6px 14px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            flex: 0 1 auto;
+            text-align: center;
+        }
+
+        .dj-page .mixes-section {
+            padding: var(--section-pad-y) 0;
+            text-align: center;
+            background-color: var(--surface-bg);
+        }
+
+        /* Booking Formular */
+        .booking-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .form-group { margin-bottom: 25px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 8px; color: #aaa; font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            background: #111;
+            border: 1px solid #333;
+            padding: 15px;
+            border-radius: 10px;
+            color: #fff;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 15px rgba(255, 51, 102, 0.2); }
+        .booking-submit { width: 100%; margin-top: 10px; }
+
+        @keyframes pulseGlow {
+            0% {
+                text-shadow: 0 0 8px rgba(255, 51, 102, 0.35);
+            }
+            100% {
+                text-shadow: 0 0 20px rgba(255, 51, 102, 0.75), 0 0 6px rgba(255, 255, 255, 0.35);
+            }
+        }
+
+        .dj-page .social-footer {
+            padding: clamp(36px, 8vw, 50px) var(--page-pad-x);
+            text-align: center;
+            background: var(--surface-bg);
+            border-top: 1px solid #111;
+        }
+
+        #form-feedback {
+            margin-top: 20px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <pre class="ascii-art">
-  _____       _        _         _____  _____  ______  _____
- |  __ \     | |      | |  /\   / ____|/ ____||  ____||  __ \
- | |  | |    | |      | | /  \ | |  __| |  __ | |__   | |__) |
- | |  | |_   | |  _   | |/ /\ \| | |_ | | |_ ||  __|  |  _  /
- | |__| | |__| | | |__| / ____ \ |__| | |__| || |____ | | \ \
- |_____/ \____/   \____/_/    \_\_____|\_____||______||_|  \_\
-    </pre>
+<div id="page-root">
+    <div class="dj-page">
+        <!-- Navbar -->
+        <nav class="dj-navbar">
+            <div class="nav-container">
+                <a href="#" class="nav-logo">JAGGER</a>
+                <div class="nav-links">
+                    <ul>
+                        <li><a href="#gigs">Gigs</a></li>
+                        <li><a href="#mixes">Mixes</a></li>
+                    </ul>
+                    <a href="#booking" class="btn nav-btn">Book Now</a>
+                </div>
+            </div>
+        </nav>
 
-    <div><span class="prompt">guest@jagger-system:~$</span> ./init_system.sh</div>
-    <div>System initialized. Welcome to the official DJ JAGGER terminal.</div>
+        <!-- Hero Section -->
+        <header class="hero">
+            <h1>DJ JAGGER</h1>
+            <p class="genres">TECHNO / TECH-HOUSE / MELODIC</p>
+            <a href="#gigs" class="btn">View Tour Dates</a>
+        </header>
 
-    <h2><span class="prompt">guest@jagger-system:~$</span> cat future_gigs.txt<span class="cursor"></span></h2>
-    <div id="gigs-container">
-        <div class="system-msg">[ Fetching data from mainframe... ]</div>
+        <!-- Gigs Section -->
+        <section id="gigs" class="gigs-section">
+            <h2 class="section-title">Upcoming <span>Gigs</span></h2>
+            <div id="gigs-container" class="gigs-container">
+                <div>[ Loading Data... ]</div>
+            </div>
+        </section>
+
+        <!-- Mixes Section -->
+        <section id="mixes" class="mixes-section">
+            <h2 class="section-title">Latest <span>Mixes</span></h2>
+            <div id="mixes-container" class="gigs-container">
+                <div>[ Loading Data... ]</div>
+            </div>
+        </section>
+
+        <!-- Booking Section -->
+        <section id="booking" class="gigs-section" style="background-color: var(--page-bg);">
+            <h2 class="section-title">Book <span>DJ JAGGER</span></h2>
+            <div class="booking-container">
+                <form id="booking-form">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" required placeholder="Your Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="event_details">Event Details</label>
+                        <input type="text" id="event_details" name="event_details" placeholder="Date, Location, Venue">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" rows="4" placeholder="Tell us more about your event..."></textarea>
+                    </div>
+                    <button type="submit" class="btn booking-submit">Send Request</button>
+                    <div id="form-feedback"></div>
+                </form>
+            </div>
+        </section>
+
+        <footer class="social-footer">
+            <p style="color: #666; font-size: 0.9rem;">&copy; 2024 DJ JAGGER. All rights reserved.</p>
+        </footer>
     </div>
-
-    <h2><span class="prompt">guest@jagger-system:~$</span> ls -l /mixes/<span class="cursor"></span></h2>
-    <div id="mixes-container">
-        <div class="system-msg">[ Fetching data from mainframe... ]</div>
-    </div>
-
-    <h2><span class="prompt">guest@jagger-system:~$</span> ./book_dj.sh<span class="cursor"></span></h2>
-    <form id="booking-form">
-        <label for="name">NAME:</label>
-        <input type="text" id="name" name="name" required placeholder="Enter your name">
-
-        <label for="email">EMAIL:</label>
-        <input type="email" id="email" name="email" required placeholder="Enter your email">
-
-        <label for="event_details">EVENT DETAILS:</label>
-        <input type="text" id="event_details" name="event_details" placeholder="Date, Location, etc.">
-
-        <label for="message">MESSAGE:</label>
-        <textarea id="message" name="message" rows="4" placeholder="Additional info..."></textarea>
-
-        <button type="submit">[ EXECUTE BOOKING ]</button>
-    </form>
-    <div id="form-feedback" class="system-msg"></div>
-
 </div>
+<!-- Admin Link at bottom -->
+<a href="/admin" class="secret-login">Admin Login</a>
 
 <script>
     const API_URL = '/api';
@@ -175,22 +449,23 @@
             const data = await response.json();
 
             if (data.length === 0) {
-                container.innerHTML = '<div>No upcoming gigs found in database.</div>';
+                container.innerHTML = '<div>No upcoming gigs currently listed.</div>';
                 return;
             }
 
-            let html = '<ul>';
+            let html = '';
             data.forEach(gig => {
-                html += `<li>[${escapeHtml(gig.date)}] ${escapeHtml(gig.location)} - ${escapeHtml(gig.genre) || 'N/A'}`;
-                if (gig.ticket_link) {
-                    html += ` (<a href="${escapeHtml(gig.ticket_link)}" target="_blank" style="color:var(--text-color);">Tickets</a>)`;
-                }
-                html += '</li>';
+                html += `
+                <div class="gig-card">
+                    <div class="gig-date">${escapeHtml(gig.date)}</div>
+                    <div class="gig-location">${escapeHtml(gig.location)}</div>
+                    ${gig.genre ? `<div class="gig-genre">${escapeHtml(gig.genre)}</div>` : ''}
+                    ${gig.ticket_link ? `<a href="${escapeHtml(gig.ticket_link)}" target="_blank" class="btn" style="min-width: auto; padding: 8px 20px; font-size: 0.8rem;">Tickets</a>` : ''}
+                </div>`;
             });
-            html += '</ul>';
             container.innerHTML = html;
         } catch (error) {
-            container.innerHTML = '<div style="color:red;">[ERROR] Connection refused.</div>';
+            container.innerHTML = '<div style="color:red;">Error loading gigs.</div>';
         }
     }
 
@@ -201,26 +476,30 @@
             const data = await response.json();
 
             if (data.length === 0) {
-                container.innerHTML = '<div>No mixes found in directory.</div>';
+                container.innerHTML = '<div>No mixes currently listed.</div>';
                 return;
             }
 
-            let html = '<ul>';
+            let html = '';
             data.forEach(mix => {
-                html += `<li>[${escapeHtml(mix.release_date) || 'UNKNOWN'}] <a href="${escapeHtml(mix.soundcloud_url)}" target="_blank" style="color:var(--text-color);">${escapeHtml(mix.title)}</a></li>`;
+                html += `
+                <div class="gig-card">
+                    <div class="gig-date">${escapeHtml(mix.release_date) || 'Recent'}</div>
+                    <div class="gig-location">${escapeHtml(mix.title)}</div>
+                    <a href="${escapeHtml(mix.soundcloud_url)}" target="_blank" class="btn" style="min-width: auto; padding: 8px 20px; font-size: 0.8rem;">Listen</a>
+                </div>`;
             });
-            html += '</ul>';
             container.innerHTML = html;
         } catch (error) {
-            container.innerHTML = '<div style="color:red;">[ERROR] Connection refused.</div>';
+            container.innerHTML = '<div style="color:red;">Error loading mixes.</div>';
         }
     }
 
     document.getElementById('booking-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const feedback = document.getElementById('form-feedback');
-        feedback.innerText = '[ Sending transmission... ]';
-        feedback.style.color = 'var(--text-color)';
+        feedback.innerText = 'Sending request...';
+        feedback.style.color = 'var(--primary-color)';
 
         const formData = {
             name: document.getElementById('name').value,
@@ -237,15 +516,16 @@
             });
             const result = await response.json();
 
-            if (response.ok) {
-                feedback.innerText = '[ SUCCESS ] ' + result.message;
+            if (response.ok || response.status === 201) {
+                feedback.innerText = result.message;
+                feedback.style.color = '#0f0'; // Success green
                 document.getElementById('booking-form').reset();
             } else {
-                feedback.innerText = '[ ERROR ] ' + (result.error || 'Transmission failed.');
+                feedback.innerText = result.error || 'Failed to send request.';
                 feedback.style.color = 'red';
             }
         } catch (error) {
-            feedback.innerText = '[ CRITICAL ERROR ] Uplink offline.';
+            feedback.innerText = 'Network error. Please try again later.';
             feedback.style.color = 'red';
         }
     });
