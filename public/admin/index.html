@@ -4,70 +4,128 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JAGGER SYS-ADMIN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #050505;
-            --text-color: #0f0;
-            --danger-color: #f00;
-            --font-family: 'Courier New', Courier, monospace;
+            --primary-color: #ff3366;
+            --secondary-color: #7b2cbf;
+            --page-bg: #050505;
+            --surface-bg: #080808;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --danger-color: #ff3333;
+            --page-pad-x: clamp(12px, 4vw, 28px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+            scroll-behavior: smooth;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: var(--font-family);
-            margin: 0;
-            padding: 20px;
+            background-color: var(--page-bg);
+            color: #ffffff;
+            min-height: 100vh;
         }
+
+        .dj-navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(5, 5, 5, 0.8);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 15px var(--page-pad-x);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            color: #fff;
+            font-weight: 900;
+            font-size: 1.5rem;
+            text-decoration: none;
+            letter-spacing: 2px;
+        }
+
+        .nav-logo span {
+            color: var(--primary-color);
+        }
+
+        .nav-links a {
+            color: #ccc;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .nav-links a:hover { color: var(--primary-color); }
 
         .container {
             max-width: 1000px;
-            margin: 0 auto;
+            margin: 100px auto 50px;
+            padding: 0 var(--page-pad-x);
         }
 
-        h1, h2 {
-            font-weight: normal;
-            border-bottom: 1px dashed var(--text-color);
-            padding-bottom: 5px;
-            margin-top: 40px;
+        .section-title {
+            font-size: clamp(1.35rem, 3vw + 0.5rem, 2rem);
+            font-weight: 900;
+            margin-bottom: 25px;
             text-transform: uppercase;
-        }
-
-        .prompt {
+            letter-spacing: 1px;
             color: #fff;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+            margin-top: 50px;
         }
 
-        /* Forms */
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 20px;
-            max-width: 500px;
+        .section-title span {
+            color: var(--primary-color);
         }
 
-        input, textarea, button {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            border: 1px solid var(--text-color);
-            font-family: var(--font-family);
-            padding: 10px;
-            outline: none;
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: clamp(20px, 4vw, 30px);
+            border-radius: 15px;
+            margin-bottom: 30px;
         }
 
-        input:focus, textarea:focus {
-            box-shadow: 0 0 5px var(--text-color);
-        }
-
-        button {
-            cursor: pointer;
-            width: fit-content;
+        /* Buttons */
+        .btn {
+            background: transparent;
+            color: #fff;
+            border: 2px solid var(--primary-color);
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
             text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            display: inline-block;
+            text-align: center;
         }
 
-        button:hover {
-            background-color: var(--text-color);
-            color: var(--bg-color);
+        .btn:hover {
+            background: var(--primary-color);
+            box-shadow: 0 0 15px var(--primary-color);
+            transform: scale(1.05);
         }
 
         .btn-danger {
@@ -76,102 +134,146 @@
         }
 
         .btn-danger:hover {
-            background-color: var(--danger-color);
-            color: var(--bg-color);
+            background: var(--danger-color);
+            box-shadow: 0 0 15px var(--danger-color);
+            color: #fff;
+        }
+
+        /* Forms */
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #aaa;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .form-group input {
+            width: 100%;
+            background: #111;
+            border: 1px solid #333;
+            padding: 12px 15px;
+            border-radius: 8px;
+            color: #fff;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(255, 51, 102, 0.2);
         }
 
         /* Lists and Tables */
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        li {
-            margin-bottom: 10px;
+        .gig-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border: 1px solid #333;
-            padding: 10px;
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            gap: 15px;
         }
 
-        .system-msg {
-            margin-top: 10px;
-            font-style: italic;
-            opacity: 0.8;
+        .gig-item:last-child {
+            border-bottom: none;
+        }
+
+        .gig-info strong { color: #fff; margin-right: 10px; font-weight: 900;}
+        .gig-info span { color: #aaa; font-size: 0.9rem; }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            min-width: 600px;
         }
 
         th, td {
-            border: 1px solid var(--text-color);
-            padding: 10px;
+            padding: 12px 15px;
             text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         th {
-            color: #fff;
+            color: #888;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
         }
 
-        .separator {
-            margin: 40px 0;
-            color: #555;
-            text-align: center;
-            letter-spacing: 5px;
+        td {
+            font-size: 0.95rem;
+            color: #ddd;
         }
 
+        .sys-feedback {
+            margin-top: 15px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
 
+<nav class="dj-navbar">
+    <div class="nav-container">
+        <a href="/" class="nav-logo">JAGGER <span>ADMIN</span></a>
+        <div class="nav-links">
+            <a href="/">Back to Site</a>
+        </div>
+    </div>
+</nav>
+
 <div class="container">
-    <h1><span class="prompt">root@jagger-system:~$</span> ./open_dashboard.sh</h1>
-    <div class="system-msg">ACCESS GRANTED. WELCOME ADMIN.</div>
 
-    <div class="separator">==================================================</div>
-
-    <h2><span class="prompt">root@jagger-system:~$</span> view --bookings</h2>
-    <div id="bookings-container">
-        <div class="system-msg">[ Fetching incoming transmissions... ]</div>
+    <h2 class="section-title">Incoming <span>Bookings</span></h2>
+    <div class="card table-responsive" id="bookings-container">
+        <div style="color: #aaa;">Loading bookings...</div>
     </div>
 
-    <div class="separator">==================================================</div>
-
-    <h2><span class="prompt">root@jagger-system:~$</span> gigs --manage</h2>
-    <div id="gigs-container">
-        <div class="system-msg">[ Fetching gig database... ]</div>
+    <h2 class="section-title">Manage <span>Gigs</span></h2>
+    <div class="card" id="gigs-container">
+        <div style="color: #aaa;">Loading gigs...</div>
     </div>
 
-    <div class="separator">==================================================</div>
+    <h2 class="section-title">Create <span>New Gig</span></h2>
+    <div class="card">
+        <form id="create-gig-form">
+            <div class="form-group">
+                <label for="date">Date (e.g. 2024-12-31)</label>
+                <input type="text" id="date" required placeholder="YYYY-MM-DD">
+            </div>
 
-    <h2><span class="prompt">root@jagger-system:~$</span> gigs --create</h2>
-    <form id="create-gig-form">
-        <label for="date">DATE (e.g. 2024-12-31):</label>
-        <input type="text" id="date" required placeholder="YYYY-MM-DD">
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" required placeholder="Club XYZ, Berlin">
+            </div>
 
-        <label for="location">LOCATION:</label>
-        <input type="text" id="location" required placeholder="Club XYZ, Berlin">
+            <div class="form-group">
+                <label for="genre">Genre (Optional)</label>
+                <input type="text" id="genre" placeholder="Techno / House">
+            </div>
 
-        <label for="genre">GENRE (Optional):</label>
-        <input type="text" id="genre" placeholder="Techno / House">
+            <div class="form-group">
+                <label for="ticket_link">Ticket Link (Optional)</label>
+                <input type="url" id="ticket_link" placeholder="https://...">
+            </div>
 
-        <label for="ticket_link">TICKET LINK (Optional):</label>
-        <input type="url" id="ticket_link" placeholder="https://...">
+            <button type="submit" class="btn">Add Gig</button>
+            <div id="gig-feedback" class="sys-feedback"></div>
+        </form>
+    </div>
 
-        <button type="submit">[ INJECT GIG ]</button>
-        <div id="gig-feedback" class="system-msg"></div>
-    </form>
-
-    <div class="separator">==================================================</div>
 </div>
 
 <script>
-    // Because the HTML itself is protected by Basic Auth,
-    // the browser automatically sends the Basic Auth headers for all fetch requests to /api/admin/...
     const API_URL = '/api/admin';
 
     async function fetchBookings() {
@@ -181,7 +283,7 @@
             const data = await response.json();
 
             if (data.length === 0) {
-                container.innerHTML = '<div>[ NO INCOMING BOOKINGS DETECTED ]</div>';
+                container.innerHTML = '<div style="color: #aaa;">No incoming bookings.</div>';
                 return;
             }
 
@@ -189,11 +291,11 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>DATE</th>
-                            <th>NAME</th>
-                            <th>EMAIL</th>
-                            <th>DETAILS</th>
-                            <th>MESSAGE</th>
+                            <th>Date</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Details</th>
+                            <th>Message</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -202,9 +304,9 @@
             data.forEach(b => {
                 html += `
                     <tr>
-                        <td>${new Date(b.created_at).toLocaleString()}</td>
-                        <td>${escapeHtml(b.name)}</td>
-                        <td>${escapeHtml(b.email)}</td>
+                        <td style="white-space: nowrap;">${new Date(b.created_at).toLocaleDateString()}</td>
+                        <td><strong>${escapeHtml(b.name)}</strong></td>
+                        <td><a href="mailto:${escapeHtml(b.email)}" style="color: var(--primary-color); text-decoration:none;">${escapeHtml(b.email)}</a></td>
                         <td>${escapeHtml(b.event_details || '-')}</td>
                         <td>${escapeHtml(b.message || '-')}</td>
                     </tr>
@@ -214,60 +316,61 @@
             html += '</tbody></table>';
             container.innerHTML = html;
         } catch (err) {
-            container.innerHTML = '<div style="color:var(--danger-color);">[ ERROR RETRIEVING BOOKINGS ]</div>';
+            container.innerHTML = '<div style="color:var(--danger-color);">Error retrieving bookings.</div>';
         }
     }
 
     async function fetchGigs() {
         const container = document.getElementById('gigs-container');
         try {
-            const response = await fetch('/api/gigs'); // Can use public route to fetch
+            const response = await fetch('/api/gigs');
             const data = await response.json();
 
             if (data.length === 0) {
-                container.innerHTML = '<div>[ NO GIGS FOUND IN DATABASE ]</div>';
+                container.innerHTML = '<div style="color: #aaa;">No gigs listed.</div>';
                 return;
             }
 
-            let html = '<ul>';
+            let html = '<div>';
             data.forEach(gig => {
                 html += `
-                    <li>
-                        <div>
-                            <strong>[${escapeHtml(gig.date)}]</strong> ${escapeHtml(gig.location)}
-                            <span style="color:#888;">| ${escapeHtml(gig.genre || 'N/A')}</span>
+                    <div class="gig-item">
+                        <div class="gig-info">
+                            <strong>${escapeHtml(gig.date)}</strong>
+                            ${escapeHtml(gig.location)}
+                            <span>${gig.genre ? '| ' + escapeHtml(gig.genre) : ''}</span>
                         </div>
-                        <button class="btn-danger" onclick="deleteGig(${gig.id})">[ DELETE ]</button>
-                    </li>
+                        <button class="btn btn-danger" style="padding: 6px 15px; font-size:0.75rem;" onclick="deleteGig(${gig.id})">Delete</button>
+                    </div>
                 `;
             });
-            html += '</ul>';
+            html += '</div>';
             container.innerHTML = html;
         } catch (err) {
-            container.innerHTML = '<div style="color:var(--danger-color);">[ ERROR RETRIEVING GIGS ]</div>';
+            container.innerHTML = '<div style="color:var(--danger-color);">Error retrieving gigs.</div>';
         }
     }
 
     async function deleteGig(id) {
-        if (!confirm('WARNING: PERMANENTLY DELETE GIG?')) return;
+        if (!confirm('Are you sure you want to delete this gig?')) return;
 
         try {
             const response = await fetch(`${API_URL}/gigs/${id}`, { method: 'DELETE' });
             if (response.ok) {
-                fetchGigs(); // Refresh list
+                fetchGigs();
             } else {
-                alert('[ ERROR ] Failed to delete.');
+                alert('Failed to delete gig.');
             }
         } catch (err) {
-            alert('[ CRITICAL ERROR ] Deletion sequence failed.');
+            alert('Deletion failed.');
         }
     }
 
     document.getElementById('create-gig-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const feedback = document.getElementById('gig-feedback');
-        feedback.innerText = '[ PROCESSING... ]';
-        feedback.style.color = 'var(--text-color)';
+        feedback.innerText = 'Processing...';
+        feedback.style.color = '#fff';
 
         const payload = {
             date: document.getElementById('date').value,
@@ -283,16 +386,17 @@
                 body: JSON.stringify(payload)
             });
 
-            if (response.ok) {
-                feedback.innerText = '[ SUCCESS ] Gig injected into mainframe.';
+            if (response.ok || response.status === 201) {
+                feedback.innerText = 'Gig successfully created.';
+                feedback.style.color = '#0f0';
                 document.getElementById('create-gig-form').reset();
-                fetchGigs(); // Refresh list
+                fetchGigs();
             } else {
-                feedback.innerText = '[ ERROR ] Injection rejected.';
+                feedback.innerText = 'Failed to create gig.';
                 feedback.style.color = 'var(--danger-color)';
             }
         } catch (err) {
-            feedback.innerText = '[ CRITICAL ERROR ] Connection lost.';
+            feedback.innerText = 'Network error.';
             feedback.style.color = 'var(--danger-color)';
         }
     });
