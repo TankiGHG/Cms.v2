@@ -54,24 +54,36 @@ function initDb() {
         `);
 
         db.run(`
-            CREATE TABLE IF NOT EXISTS mixes (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                title TEXT NOT NULL,
-                soundcloud_url TEXT NOT NULL,
-                release_date TEXT
-            )
-        `);
-
-        db.run(`
             CREATE TABLE IF NOT EXISTS bookings (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 email TEXT NOT NULL,
                 event_details TEXT,
                 message TEXT,
+                status TEXT DEFAULT 'pending',
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         `);
+
+        // Check if status column exists in bookings, add it if not (for migration)
+        db.all("PRAGMA table_info(bookings)", (err, columns) => {
+            if (!err) {
+                const hasStatus = columns.some(col => col.name === 'status');
+                if (!hasStatus) {
+                    db.run("ALTER TABLE bookings ADD COLUMN status TEXT DEFAULT 'pending'");
+                }
+            }
+        });
+
+        db.run(`
+            CREATE TABLE IF NOT EXISTS settings (
+                key TEXT PRIMARY KEY,
+                value TEXT
+            )
+        `, () => {
+            // Insert default hero background if setting doesn't exist
+            db.run("INSERT OR IGNORE INTO settings (key, value) VALUES ('hero_bg', 'https://images.unsplash.com/photo-1516873240891-4bf014598ab4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')");
+        });
     });
 }
 
@@ -99,12 +111,13 @@ app.get('/api/gigs', (req, res) => {
     });
 });
 
-// Get mixes
-app.get('/api/mixes', (req, res) => {
-    const query = `SELECT * FROM mixes ORDER BY release_date DESC`;
-    db.all(query, [], (err, rows) => {
+// Get settings (public)
+app.get('/api/settings', (req, res) => {
+    db.all("SELECT key, value FROM settings", [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.json(rows);
+        const settings = {};
+        rows.forEach(r => settings[r.key] = r.value);
+        res.json(settings);
     });
 });
 
@@ -192,6 +205,59 @@ app.get('/api/admin/bookings', (req, res) => {
     db.all(query, [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(rows);
+    });
+});
+
+// Update booking status
+app.put('/api/admin/bookings/:id/status', (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+    if (!['pending', 'accepted', 'rejected'].includes(status)) {
+        return res.status(400).json({ error: 'Invalid status' });
+    }
+    db.run("UPDATE bookings SET status = ? WHERE id = ?", [status, id], function(err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ success: true, status });
+    });
+});
+
+// Reply to booking (Send Email)
+app.post('/api/admin/bookings/:id/reply', (req, res) => {
+    const { id } = req.params;
+    const { replyMessage, bookingEmail, bookingName } = req.body;
+
+    if (!replyMessage || !bookingEmail) {
+        return res.status(400).json({ error: 'Reply message and email are required.' });
+    }
+
+    try {
+        const mailOptions = {
+            from: process.env.SMTP_FROM,
+            to: bookingEmail,
+            subject: `Re: Booking Request - DJ JAGGER`,
+            text: replyMessage
+        };
+
+        transporter.sendMail(mailOptions, (mailErr, info) => {
+            if (mailErr) {
+                console.error('Error sending reply:', mailErr.message);
+                return res.status(500).json({ error: 'Failed to send reply email.' });
+            }
+            res.json({ success: true, message: 'Reply sent successfully.' });
+        });
+    } catch (e) {
+        res.status(500).json({ error: 'Mail service unavailable.' });
+    }
+});
+
+// Update settings
+app.post('/api/admin/settings', (req, res) => {
+    const { key, value } = req.body;
+    if (!key) return res.status(400).json({ error: 'Key is required' });
+
+    db.run("INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value", [key, value], function(err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ success: true });
     });
 });
 

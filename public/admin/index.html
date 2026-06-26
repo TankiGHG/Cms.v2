@@ -166,6 +166,40 @@
             box-shadow: 0 0 10px rgba(255, 51, 102, 0.2);
         }
 
+        /* Modal for Replying */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: var(--surface-bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+        }
+        .modal textarea {
+            width: 100%;
+            background: #111;
+            border: 1px solid #333;
+            padding: 15px;
+            border-radius: 8px;
+            color: #fff;
+            min-height: 150px;
+            margin-bottom: 20px;
+        }
+
         /* Lists and Tables */
         .gig-item {
             display: flex;
@@ -233,6 +267,18 @@
 
 <div class="container">
 
+    <h2 class="section-title">Global <span>Settings</span></h2>
+    <div class="card">
+        <form id="settings-form">
+            <div class="form-group">
+                <label for="hero_bg">Hero Background Image URL</label>
+                <input type="url" id="hero_bg" placeholder="https://...">
+            </div>
+            <button type="submit" class="btn">Save Settings</button>
+            <div id="settings-feedback" class="sys-feedback"></div>
+        </form>
+    </div>
+
     <h2 class="section-title">Incoming <span>Bookings</span></h2>
     <div class="card table-responsive" id="bookings-container">
         <div style="color: #aaa;">Loading bookings...</div>
@@ -273,8 +319,127 @@
 
 </div>
 
+<!-- Reply Modal -->
+<div id="replyModal" class="modal">
+  <div class="modal-content">
+    <h3 style="margin-bottom: 20px;">Reply to <span id="reply-name" style="color:var(--primary-color);"></span></h3>
+    <div id="reply-details" style="margin-bottom: 20px; color:#aaa; font-size:0.85rem;"></div>
+    <form id="reply-form">
+        <input type="hidden" id="reply-id">
+        <input type="hidden" id="reply-email">
+        <textarea id="reply-message" required placeholder="Type your email response here..."></textarea>
+        <div style="display:flex; gap:10px;">
+            <button type="submit" class="btn">Send Email</button>
+            <button type="button" class="btn btn-danger" onclick="closeModal()">Cancel</button>
+        </div>
+        <div id="reply-feedback" class="sys-feedback"></div>
+    </form>
+  </div>
+</div>
+
 <script>
     const API_URL = '/api/admin';
+
+    async function loadSettings() {
+        try {
+            const response = await fetch('/api/settings');
+            const data = await response.json();
+            if (data.hero_bg) {
+                document.getElementById('hero_bg').value = data.hero_bg;
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    document.getElementById('settings-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const feedback = document.getElementById('settings-feedback');
+        feedback.innerText = 'Saving...';
+
+        try {
+            const response = await fetch(`${API_URL}/settings`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key: 'hero_bg', value: document.getElementById('hero_bg').value })
+            });
+            if (response.ok) {
+                feedback.innerText = 'Settings saved!';
+                feedback.style.color = '#0f0';
+            } else {
+                feedback.innerText = 'Failed to save.';
+                feedback.style.color = 'var(--danger-color)';
+            }
+        } catch(err) {
+            feedback.innerText = 'Network error.';
+            feedback.style.color = 'var(--danger-color)';
+        }
+    });
+
+    // Modal Logic
+    const modal = document.getElementById('replyModal');
+    function openModal(id, name, email, details) {
+        document.getElementById('reply-id').value = id;
+        document.getElementById('reply-email').value = email;
+        document.getElementById('reply-name').innerText = escapeHtml(name);
+        document.getElementById('reply-details').innerText = `To: ${escapeHtml(email)} | Event: ${escapeHtml(details)}`;
+        document.getElementById('reply-message').value = '';
+        document.getElementById('reply-feedback').innerText = '';
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        modal.style.display = 'none';
+    }
+
+    document.getElementById('reply-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('reply-id').value;
+        const email = document.getElementById('reply-email').value;
+        const name = document.getElementById('reply-name').innerText;
+        const message = document.getElementById('reply-message').value;
+        const feedback = document.getElementById('reply-feedback');
+
+        feedback.innerText = 'Sending email...';
+        feedback.style.color = '#fff';
+
+        try {
+            const response = await fetch(`${API_URL}/bookings/${id}/reply`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ replyMessage: message, bookingEmail: email, bookingName: name })
+            });
+
+            if (response.ok) {
+                feedback.innerText = 'Email sent successfully.';
+                feedback.style.color = '#0f0';
+                setTimeout(closeModal, 1500);
+            } else {
+                feedback.innerText = 'Failed to send email.';
+                feedback.style.color = 'var(--danger-color)';
+            }
+        } catch (err) {
+            feedback.innerText = 'Network error.';
+            feedback.style.color = 'var(--danger-color)';
+        }
+    });
+
+    async function setBookingStatus(id, status) {
+        try {
+            const response = await fetch(`${API_URL}/bookings/${id}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status })
+            });
+            if (response.ok) {
+                fetchBookings();
+            } else {
+                alert('Failed to update status.');
+            }
+        } catch (err) {
+            alert('Network error.');
+        }
+    }
 
     async function fetchBookings() {
         const container = document.getElementById('bookings-container');
@@ -292,29 +457,57 @@
                     <thead>
                         <tr>
                             <th>Date</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Details</th>
-                            <th>Message</th>
+                            <th>Name / Email</th>
+                            <th>Event Details</th>
+                            <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
             `;
 
             data.forEach(b => {
+                const statusColor = b.status === 'accepted' ? '#0f0' : (b.status === 'rejected' ? 'var(--danger-color)' : '#aaa');
+
                 html += `
                     <tr>
-                        <td style="white-space: nowrap;">${new Date(b.created_at).toLocaleDateString()}</td>
-                        <td><strong>${escapeHtml(b.name)}</strong></td>
-                        <td><a href="mailto:${escapeHtml(b.email)}" style="color: var(--primary-color); text-decoration:none;">${escapeHtml(b.email)}</a></td>
-                        <td>${escapeHtml(b.event_details || '-')}</td>
-                        <td>${escapeHtml(b.message || '-')}</td>
+                        <td style="white-space: nowrap; vertical-align: top;">${new Date(b.created_at).toLocaleDateString()}</td>
+                        <td style="vertical-align: top;">
+                            <strong>${escapeHtml(b.name)}</strong><br>
+                            <span style="font-size:0.85rem; color:#aaa;">${escapeHtml(b.email)}</span>
+                        </td>
+                        <td style="vertical-align: top;">
+                            <strong>${escapeHtml(b.event_details || '-')}</strong><br>
+                            <span style="font-size:0.85rem; color:#888;">${escapeHtml(b.message || '-')}</span>
+                        </td>
+                        <td style="vertical-align: top; font-weight: 600; text-transform: uppercase; color: ${statusColor};">
+                            ${escapeHtml(b.status)}
+                        </td>
+                        <td style="vertical-align: top;">
+                            <div style="display:flex; gap:5px; flex-wrap:wrap;">
+                                ${b.status === 'pending' ? `<button class="btn" style="padding: 4px 10px; font-size:0.7rem;" onclick="setBookingStatus(${b.id}, 'accepted')">Accept</button>` : ''}
+                                ${b.status === 'pending' ? `<button class="btn btn-danger" style="padding: 4px 10px; font-size:0.7rem;" onclick="setBookingStatus(${b.id}, 'rejected')">Reject</button>` : ''}
+                                <button class="btn reply-btn" style="padding: 4px 10px; font-size:0.7rem; border-color:#888;" data-id="${b.id}" data-name="${escapeHtml(b.name)}" data-email="${escapeHtml(b.email)}" data-details="${escapeHtml(b.event_details || '')}">Reply</button>
+                            </div>
+                        </td>
                     </tr>
                 `;
             });
 
             html += '</tbody></table>';
             container.innerHTML = html;
+
+            // Attach event listeners for reply buttons to prevent Stored XSS via inline onclick
+            document.querySelectorAll('.reply-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    openModal(
+                        this.getAttribute('data-id'),
+                        this.getAttribute('data-name'),
+                        this.getAttribute('data-email'),
+                        this.getAttribute('data-details')
+                    );
+                });
+            });
         } catch (err) {
             container.innerHTML = '<div style="color:var(--danger-color);">Error retrieving bookings.</div>';
         }
@@ -414,6 +607,7 @@
     }
 
     // Init
+    loadSettings();
     fetchBookings();
     fetchGigs();
 </script>

@@ -362,7 +362,6 @@
                 <div class="nav-links">
                     <ul>
                         <li><a href="#gigs">Gigs</a></li>
-                        <li><a href="#mixes">Mixes</a></li>
                     </ul>
                     <a href="#booking" class="btn nav-btn">Book Now</a>
                 </div>
@@ -370,7 +369,7 @@
         </nav>
 
         <!-- Hero Section -->
-        <header class="hero">
+        <header class="hero" id="hero-section">
             <h1>DJ JAGGER</h1>
             <p class="genres">TECHNO / TECH-HOUSE / MELODIC</p>
             <a href="#gigs" class="btn">View Tour Dates</a>
@@ -380,14 +379,6 @@
         <section id="gigs" class="gigs-section">
             <h2 class="section-title">Upcoming <span>Gigs</span></h2>
             <div id="gigs-container" class="gigs-container">
-                <div>[ Loading Data... ]</div>
-            </div>
-        </section>
-
-        <!-- Mixes Section -->
-        <section id="mixes" class="mixes-section">
-            <h2 class="section-title">Latest <span>Mixes</span></h2>
-            <div id="mixes-container" class="gigs-container">
                 <div>[ Loading Data... ]</div>
             </div>
         </section>
@@ -469,32 +460,6 @@
         }
     }
 
-    async function fetchMixes() {
-        const container = document.getElementById('mixes-container');
-        try {
-            const response = await fetch(`${API_URL}/mixes`);
-            const data = await response.json();
-
-            if (data.length === 0) {
-                container.innerHTML = '<div>No mixes currently listed.</div>';
-                return;
-            }
-
-            let html = '';
-            data.forEach(mix => {
-                html += `
-                <div class="gig-card">
-                    <div class="gig-date">${escapeHtml(mix.release_date) || 'Recent'}</div>
-                    <div class="gig-location">${escapeHtml(mix.title)}</div>
-                    <a href="${escapeHtml(mix.soundcloud_url)}" target="_blank" class="btn" style="min-width: auto; padding: 8px 20px; font-size: 0.8rem;">Listen</a>
-                </div>`;
-            });
-            container.innerHTML = html;
-        } catch (error) {
-            container.innerHTML = '<div style="color:red;">Error loading mixes.</div>';
-        }
-    }
-
     document.getElementById('booking-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const feedback = document.getElementById('form-feedback');
@@ -530,9 +495,21 @@
         }
     });
 
+    async function fetchSettings() {
+        try {
+            const response = await fetch(`${API_URL}/settings`);
+            const settings = await response.json();
+            if (settings.hero_bg) {
+                document.getElementById('hero-section').style.backgroundImage = `linear-gradient(to bottom, rgba(5, 5, 5, 0.35), rgba(5, 5, 5, 0.92)), url('${escapeHtml(settings.hero_bg)}')`;
+            }
+        } catch (error) {
+            console.error("Failed to load settings", error);
+        }
+    }
+
     // Initialize
+    fetchSettings();
     fetchGigs();
-    fetchMixes();
 </script>
 </body>
 </html>
