@@ -41,7 +41,7 @@ Das Ziel dieses Projekts ist es, eine digitale Visitenkarte zu bieten, die nicht
 
 ## Setup & Deployment (Schritt-für-Schritt)
 
-Dieses Projekt ist für ein blitzschnelles Deployment via Docker optimiert.
+Dieses Projekt ist für ein blitzschnelles Deployment via Docker optimiert und verfügt über ein interaktives Setup-Skript.
 
 ### 1. Repository klonen
 ```bash
@@ -49,22 +49,23 @@ git clone https://github.com/dein-username/dj-jagger-cms.git
 cd dj-jagger-cms
 ```
 
-### 2. Umgebungsvariablen konfigurieren
-Kopiere die Vorlage und trage deine Zugangsdaten ein:
+### 2. Setup-Skript ausführen
+Führe das beiliegende Installations-Skript aus. Es fragt automatisch alle wichtigen Konfigurationen (Admin-Passwort, SMTP-Daten, Port) ab und generiert die `.env`-Datei.
 ```bash
-cp .env.example .env
-nano .env
+chmod +x install.sh
+./install.sh
 ```
-_Wichtig: Setze hier dein Passwort für das Admin-Dashboard (`ADMIN_PASS`) und deine korrekten Mailcow-SMTP-Daten ein._
 
-### 3. Container starten
-Baue und starte den Container im Hintergrund. Docker kümmert sich automatisch um die Installation der Node-Module und das Setup.
+Am Ende des Skripts wirst du gefragt, ob du den Docker-Container direkt starten möchtest. Bestätige dies mit `y`.
+
+### 3. Manuelles Starten (Optional)
+Falls du den Container später manuell starten möchtest, nutze:
 ```bash
 docker compose up -d --build
 ```
 
-Das war's! Die Website ist nun unter `http://localhost:3000` erreichbar.
-Das Admin-Dashboard findest du unter `http://localhost:3000/admin` (Logge dich mit den Daten aus der `.env` ein).
+Das war's! Die Website ist nun (standardmäßig) unter `http://localhost:3000` erreichbar.
+Das Admin-Dashboard findest du unter `http://localhost:3000/admin` (Logge dich mit den Daten ein, die du im Setup vergeben hast).
 
 ---
 
