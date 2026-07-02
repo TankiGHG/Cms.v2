@@ -7,7 +7,7 @@ RED='\033[1;31m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}======================================${NC}"
-echo -e "${BLUE}      DJ JAGGER CMS - INSTALLER       ${NC}"
+echo -e "${BLUE}         CMS.v2 - INSTALLER           ${NC}"
 echo -e "${BLUE}======================================${NC}"
 echo ""
 
@@ -34,15 +34,24 @@ prompt "Admin Username" "admin" ADMIN_USER
 prompt "Admin Password" "changeme123" ADMIN_PASS
 echo ""
 
-echo -e "${GREEN}--- 3. Mailcow / SMTP Configuration ---${NC}"
-prompt "SMTP Host" "mail.example.com" SMTP_HOST
-prompt "SMTP Port" "587" SMTP_PORT
-prompt "SMTP Username / Auth Email" "bookings@example.com" SMTP_USER
-read -s -p "SMTP Password: " SMTP_PASS
+echo -e "${GREEN}--- 3. Site Branding (editable later in the admin panel) ---${NC}"
+prompt "Site name" "My CMS" SITE_NAME
+prompt "Tagline" "A flexible, content-managed website" SITE_TAGLINE
 echo ""
-echo ""
-prompt "Sender Address ('From')" "'DJ JAGGER Booking' <bookings@example.com>" SMTP_FROM
-prompt "Recipient Address ('To')" "info@example.com" SMTP_TO
+
+echo -e "${GREEN}--- 4. SMTP Configuration (optional, leave host empty to skip) ---${NC}"
+prompt "SMTP Host (empty = disable email)" "" SMTP_HOST
+if [ -n "$SMTP_HOST" ]; then
+    prompt "SMTP Port" "587" SMTP_PORT
+    prompt "SMTP Username / Auth Email" "noreply@example.com" SMTP_USER
+    read -s -p "SMTP Password: " SMTP_PASS
+    echo ""
+    echo ""
+    prompt "Sender Address ('From')" "'$SITE_NAME' <noreply@example.com>" SMTP_FROM
+    prompt "Recipient Address ('To')" "inbox@example.com" SMTP_TO
+else
+    SMTP_PORT="587"; SMTP_USER=""; SMTP_PASS=""; SMTP_FROM=""; SMTP_TO=""
+fi
 echo ""
 
 echo -e "${BLUE}Generating .env file...${NC}"
@@ -55,7 +64,11 @@ PORT=$PORT
 ADMIN_USER=$ADMIN_USER
 ADMIN_PASS=$ADMIN_PASS
 
-# Mailcow SMTP Configuration
+# Site branding
+SITE_NAME=$SITE_NAME
+SITE_TAGLINE=$SITE_TAGLINE
+
+# SMTP Configuration
 SMTP_HOST=$SMTP_HOST
 SMTP_PORT=$SMTP_PORT
 SMTP_USER=$SMTP_USER

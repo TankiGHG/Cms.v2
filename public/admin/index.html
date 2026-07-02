@@ -3,613 +3,631 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JAGGER SYS-ADMIN</title>
+    <title>CMS – Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-color: #ff3366;
-            --secondary-color: #7b2cbf;
-            --page-bg: #050505;
-            --surface-bg: #080808;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --danger-color: #ff3333;
-            --page-pad-x: clamp(12px, 4vw, 28px);
+            --danger-color: #e5484d;
+            --ok-color: #46d160;
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --border: #2a2a2a;
         }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+        body { background: var(--bg); color: #eee; min-height: 100vh; }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif;
-            scroll-behavior: smooth;
+        header.top {
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+            padding: 18px 24px; background: var(--surface); border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 50;
         }
+        header.top h1 { font-size: 1.2rem; letter-spacing: 2px; text-transform: uppercase; }
+        header.top a { color: #888; text-decoration: none; font-size: 0.85rem; }
+        header.top a:hover { color: var(--primary-color); }
 
-        body {
-            background-color: var(--page-bg);
-            color: #ffffff;
-            min-height: 100vh;
+        .tabs { display: flex; gap: 4px; flex-wrap: wrap; padding: 14px 24px 0; background: var(--surface); border-bottom: 1px solid var(--border); }
+        .tab {
+            padding: 10px 18px; border: none; background: transparent; color: #999; cursor: pointer;
+            font-weight: 600; font-size: 0.9rem; border-bottom: 3px solid transparent; border-radius: 6px 6px 0 0;
         }
+        .tab:hover { color: #fff; }
+        .tab.active { color: #fff; border-bottom-color: var(--primary-color); }
 
-        .dj-navbar {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-            background: rgba(5, 5, 5, 0.8);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 15px var(--page-pad-x);
+        main { max-width: 1000px; margin: 0 auto; padding: 28px 24px 60px; }
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        h2.sec { font-size: 1.05rem; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; color: #ccc; }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+
+        label { display: block; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 6px; font-weight: 600; }
+        input, textarea, select {
+            width: 100%; background: #0e0e0e; border: 1px solid var(--border); padding: 11px;
+            border-radius: 8px; color: #fff; font-family: inherit; font-size: 0.95rem; margin-bottom: 14px;
         }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: var(--primary-color); }
+        .row { display: flex; gap: 12px; flex-wrap: wrap; }
+        .row > div { flex: 1 1 140px; }
 
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .nav-logo {
-            color: #fff;
-            font-weight: 900;
-            font-size: 1.5rem;
-            text-decoration: none;
-            letter-spacing: 2px;
-        }
-
-        .nav-logo span {
-            color: var(--primary-color);
-        }
-
-        .nav-links a {
-            color: #ccc;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.3s;
-            font-size: 0.9rem;
-        }
-
-        .nav-links a:hover { color: var(--primary-color); }
-
-        .container {
-            max-width: 1000px;
-            margin: 100px auto 50px;
-            padding: 0 var(--page-pad-x);
-        }
-
-        .section-title {
-            font-size: clamp(1.35rem, 3vw + 0.5rem, 2rem);
-            font-weight: 900;
-            margin-bottom: 25px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #fff;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 10px;
-            margin-top: 50px;
-        }
-
-        .section-title span {
-            color: var(--primary-color);
-        }
-
-        .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: clamp(20px, 4vw, 30px);
-            border-radius: 15px;
-            margin-bottom: 30px;
-        }
-
-        /* Buttons */
         .btn {
-            background: transparent;
-            color: #fff;
-            border: 2px solid var(--primary-color);
-            padding: 10px 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            border-radius: 50px;
-            transition: all 0.3s ease;
-            display: inline-block;
-            text-align: center;
+            background: transparent; color: #fff; border: 2px solid var(--primary-color);
+            padding: 9px 18px; font-weight: 600; border-radius: 8px; cursor: pointer; font-size: 0.85rem;
+            transition: background 0.2s; text-decoration: none; display: inline-block;
         }
+        .btn:hover { background: var(--primary-color); }
+        .btn-sm { padding: 5px 12px; font-size: 0.75rem; }
+        .btn-danger { border-color: var(--danger-color); }
+        .btn-danger:hover { background: var(--danger-color); }
+        .btn-muted { border-color: #555; }
+        .btn-muted:hover { background: #555; }
 
-        .btn:hover {
-            background: var(--primary-color);
-            box-shadow: 0 0 15px var(--primary-color);
-            transform: scale(1.05);
-        }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 10px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 0.9rem; }
+        th { color: #888; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 1px; }
 
-        .btn-danger {
-            border-color: var(--danger-color);
-            color: var(--danger-color);
-        }
+        .pill { padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; }
+        .muted { color: #777; }
+        .feedback { margin-top: 10px; font-weight: 600; font-size: 0.85rem; min-height: 1em; }
+        .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+        .list-item { border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+        .field-builder-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; flex-wrap: wrap; }
+        .field-builder-row input, .field-builder-row select { margin-bottom: 0; flex: 1 1 100px; }
+        .field-builder-row label.chk { display: flex; align-items: center; gap: 5px; margin: 0; color: #bbb; white-space: nowrap; }
+        .field-builder-row input[type=checkbox] { width: auto; margin: 0; }
 
-        .btn-danger:hover {
-            background: var(--danger-color);
-            box-shadow: 0 0 15px var(--danger-color);
-            color: #fff;
-        }
-
-        /* Forms */
-        .form-group { margin-bottom: 20px; }
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #aaa;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .form-group input {
-            width: 100%;
-            background: #111;
-            border: 1px solid #333;
-            padding: 12px 15px;
-            border-radius: 8px;
-            color: #fff;
-            font-family: inherit;
-            transition: all 0.3s ease;
-        }
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 10px rgba(255, 51, 102, 0.2);
-        }
-
-        /* Modal for Replying */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 2000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.8);
-            backdrop-filter: blur(5px);
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-content {
-            background-color: var(--surface-bg);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 15px;
-            padding: 30px;
-            width: 90%;
-            max-width: 600px;
-        }
-        .modal textarea {
-            width: 100%;
-            background: #111;
-            border: 1px solid #333;
-            padding: 15px;
-            border-radius: 8px;
-            color: #fff;
-            min-height: 150px;
-            margin-bottom: 20px;
-        }
-
-        /* Lists and Tables */
-        .gig-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            gap: 15px;
-        }
-
-        .gig-item:last-child {
-            border-bottom: none;
-        }
-
-        .gig-info strong { color: #fff; margin-right: 10px; font-weight: 900;}
-        .gig-info span { color: #aaa; font-size: 0.9rem; }
-
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 600px;
-        }
-
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        th {
-            color: #888;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
-
-        td {
-            font-size: 0.95rem;
-            color: #ddd;
-        }
-
-        .sys-feedback {
-            margin-top: 15px;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
+        /* Modal */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100; align-items: center; justify-content: center; padding: 16px; }
+        .modal.open { display: flex; }
+        .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; }
+        .modal-box h3 { margin-bottom: 16px; }
     </style>
 </head>
 <body>
+    <header class="top">
+        <h1 id="admin-title">CMS Admin</h1>
+        <a href="/" target="_blank">View site ↗</a>
+    </header>
 
-<nav class="dj-navbar">
-    <div class="nav-container">
-        <a href="/" class="nav-logo">JAGGER <span>ADMIN</span></a>
-        <div class="nav-links">
-            <a href="/">Back to Site</a>
+    <div class="tabs">
+        <button class="tab active" data-tab="content">Content</button>
+        <button class="tab" data-tab="types">Content Types</button>
+        <button class="tab" data-tab="messages">Messages</button>
+        <button class="tab" data-tab="settings">Settings</button>
+    </div>
+
+    <main>
+        <!-- CONTENT -->
+        <section class="panel active" id="panel-content">
+            <div class="card">
+                <label for="type-select">Content type</label>
+                <select id="type-select"></select>
+            </div>
+            <div class="card">
+                <h2 class="sec" id="entry-form-title">New entry</h2>
+                <form id="entry-form">
+                    <input type="hidden" id="entry-id">
+                    <div id="entry-fields"></div>
+                    <div class="row" style="align-items:center;">
+                        <div style="flex:0 0 auto;">
+                            <label for="entry-status">Status</label>
+                            <select id="entry-status" style="width:auto;">
+                                <option value="published">Published</option>
+                                <option value="draft">Draft</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <button type="submit" class="btn">Save entry</button>
+                        <button type="button" class="btn btn-muted" id="entry-cancel" style="display:none;">Cancel edit</button>
+                    </div>
+                    <div class="feedback" id="entry-feedback"></div>
+                </form>
+            </div>
+            <div class="card">
+                <h2 class="sec">Existing entries</h2>
+                <div id="entries-list"></div>
+            </div>
+        </section>
+
+        <!-- CONTENT TYPES -->
+        <section class="panel" id="panel-types">
+            <div class="card">
+                <h2 class="sec" id="type-form-title">New content type</h2>
+                <form id="type-form">
+                    <input type="hidden" id="type-id">
+                    <div class="row">
+                        <div><label for="type-name">Name</label><input type="text" id="type-name" placeholder="Posts" required></div>
+                        <div><label for="type-slug">Slug</label><input type="text" id="type-slug" placeholder="posts" required></div>
+                    </div>
+                    <label for="type-desc">Description</label>
+                    <input type="text" id="type-desc" placeholder="Optional description">
+                    <label>Fields</label>
+                    <div id="field-builder"></div>
+                    <button type="button" class="btn btn-sm btn-muted" id="add-field" style="margin-bottom:14px;">+ Add field</button>
+                    <div class="actions">
+                        <button type="submit" class="btn">Save content type</button>
+                        <button type="button" class="btn btn-muted" id="type-cancel" style="display:none;">Cancel edit</button>
+                    </div>
+                    <div class="feedback" id="type-feedback"></div>
+                </form>
+            </div>
+            <div class="card">
+                <h2 class="sec">Existing content types</h2>
+                <div id="types-list"></div>
+            </div>
+        </section>
+
+        <!-- MESSAGES -->
+        <section class="panel" id="panel-messages">
+            <div class="card">
+                <h2 class="sec">Inbox</h2>
+                <div id="messages-list"></div>
+            </div>
+        </section>
+
+        <!-- SETTINGS -->
+        <section class="panel" id="panel-settings">
+            <div class="card">
+                <h2 class="sec">Site settings</h2>
+                <form id="settings-form">
+                    <div id="settings-fields"></div>
+                    <button type="submit" class="btn">Save settings</button>
+                    <div class="feedback" id="settings-feedback"></div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Reply modal -->
+    <div class="modal" id="reply-modal">
+        <div class="modal-box">
+            <h3>Reply to message</h3>
+            <p class="muted" id="reply-info" style="margin-bottom:14px; font-size:0.85rem;"></p>
+            <form id="reply-form">
+                <input type="hidden" id="reply-id">
+                <input type="hidden" id="reply-email">
+                <label for="reply-subject">Subject</label>
+                <input type="text" id="reply-subject">
+                <label for="reply-message">Message</label>
+                <textarea id="reply-message" rows="6" required></textarea>
+                <div class="actions">
+                    <button type="submit" class="btn">Send email</button>
+                    <button type="button" class="btn btn-muted" id="reply-cancel">Cancel</button>
+                </div>
+                <div class="feedback" id="reply-feedback"></div>
+            </form>
         </div>
     </div>
-</nav>
 
-<div class="container">
+    <script>
+        const API = '/api/admin';
 
-    <h2 class="section-title">Global <span>Settings</span></h2>
-    <div class="card">
-        <form id="settings-form">
-            <div class="form-group">
-                <label for="hero_bg">Hero Background Image URL</label>
-                <input type="url" id="hero_bg" placeholder="https://...">
-            </div>
-            <button type="submit" class="btn">Save Settings</button>
-            <div id="settings-feedback" class="sys-feedback"></div>
-        </form>
-    </div>
+        // ---- state ----
+        let contentTypes = [];      // [{id, slug, name, description, fields, entryCount}]
+        let siteSchema = [];
+        let currentTypeSlug = null;
 
-    <h2 class="section-title">Incoming <span>Bookings</span></h2>
-    <div class="card table-responsive" id="bookings-container">
-        <div style="color: #aaa;">Loading bookings...</div>
-    </div>
-
-    <h2 class="section-title">Manage <span>Gigs</span></h2>
-    <div class="card" id="gigs-container">
-        <div style="color: #aaa;">Loading gigs...</div>
-    </div>
-
-    <h2 class="section-title">Create <span>New Gig</span></h2>
-    <div class="card">
-        <form id="create-gig-form">
-            <div class="form-group">
-                <label for="date">Date (e.g. 2024-12-31)</label>
-                <input type="text" id="date" required placeholder="YYYY-MM-DD">
-            </div>
-
-            <div class="form-group">
-                <label for="location">Location</label>
-                <input type="text" id="location" required placeholder="Club XYZ, Berlin">
-            </div>
-
-            <div class="form-group">
-                <label for="genre">Genre (Optional)</label>
-                <input type="text" id="genre" placeholder="Techno / House">
-            </div>
-
-            <div class="form-group">
-                <label for="ticket_link">Ticket Link (Optional)</label>
-                <input type="url" id="ticket_link" placeholder="https://...">
-            </div>
-
-            <button type="submit" class="btn">Add Gig</button>
-            <div id="gig-feedback" class="sys-feedback"></div>
-        </form>
-    </div>
-
-</div>
-
-<!-- Reply Modal -->
-<div id="replyModal" class="modal">
-  <div class="modal-content">
-    <h3 style="margin-bottom: 20px;">Reply to <span id="reply-name" style="color:var(--primary-color);"></span></h3>
-    <div id="reply-details" style="margin-bottom: 20px; color:#aaa; font-size:0.85rem;"></div>
-    <form id="reply-form">
-        <input type="hidden" id="reply-id">
-        <input type="hidden" id="reply-email">
-        <textarea id="reply-message" required placeholder="Type your email response here..."></textarea>
-        <div style="display:flex; gap:10px;">
-            <button type="submit" class="btn">Send Email</button>
-            <button type="button" class="btn btn-danger" onclick="closeModal()">Cancel</button>
-        </div>
-        <div id="reply-feedback" class="sys-feedback"></div>
-    </form>
-  </div>
-</div>
-
-<script>
-    const API_URL = '/api/admin';
-
-    async function loadSettings() {
-        try {
-            const response = await fetch('/api/settings');
-            const data = await response.json();
-            if (data.hero_bg) {
-                document.getElementById('hero_bg').value = data.hero_bg;
-            }
-        } catch (e) {
-            console.error(e);
+        function escapeHtml(unsafe) {
+            if (unsafe === null || unsafe === undefined) return '';
+            return unsafe.toString()
+                .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
-    }
-
-    document.getElementById('settings-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const feedback = document.getElementById('settings-feedback');
-        feedback.innerText = 'Saving...';
-
-        try {
-            const response = await fetch(`${API_URL}/settings`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ key: 'hero_bg', value: document.getElementById('hero_bg').value })
-            });
-            if (response.ok) {
-                feedback.innerText = 'Settings saved!';
-                feedback.style.color = '#0f0';
-            } else {
-                feedback.innerText = 'Failed to save.';
-                feedback.style.color = 'var(--danger-color)';
-            }
-        } catch(err) {
-            feedback.innerText = 'Network error.';
-            feedback.style.color = 'var(--danger-color)';
+        function setFeedback(el, msg, ok) {
+            el.textContent = msg;
+            el.style.color = ok === true ? 'var(--ok-color)' : ok === false ? 'var(--danger-color)' : '#fff';
         }
-    });
 
-    // Modal Logic
-    const modal = document.getElementById('replyModal');
-    function openModal(id, name, email, details) {
-        document.getElementById('reply-id').value = id;
-        document.getElementById('reply-email').value = email;
-        document.getElementById('reply-name').innerText = escapeHtml(name);
-        document.getElementById('reply-details').innerText = `To: ${escapeHtml(email)} | Event: ${escapeHtml(details)}`;
-        document.getElementById('reply-message').value = '';
-        document.getElementById('reply-feedback').innerText = '';
-        modal.style.display = 'flex';
-    }
-
-    function closeModal() {
-        modal.style.display = 'none';
-    }
-
-    document.getElementById('reply-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const id = document.getElementById('reply-id').value;
-        const email = document.getElementById('reply-email').value;
-        const name = document.getElementById('reply-name').innerText;
-        const message = document.getElementById('reply-message').value;
-        const feedback = document.getElementById('reply-feedback');
-
-        feedback.innerText = 'Sending email...';
-        feedback.style.color = '#fff';
-
-        try {
-            const response = await fetch(`${API_URL}/bookings/${id}/reply`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ replyMessage: message, bookingEmail: email, bookingName: name })
+        // ---- tabs ----
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+                if (tab.dataset.tab === 'messages') loadMessages();
             });
+        });
 
-            if (response.ok) {
-                feedback.innerText = 'Email sent successfully.';
-                feedback.style.color = '#0f0';
-                setTimeout(closeModal, 1500);
-            } else {
-                feedback.innerText = 'Failed to send email.';
-                feedback.style.color = 'var(--danger-color)';
-            }
-        } catch (err) {
-            feedback.innerText = 'Network error.';
-            feedback.style.color = 'var(--danger-color)';
+        // =====================================================================
+        //  CONTENT TYPES  (definitions + field builder)
+        // =====================================================================
+        const fieldTypeOptions = ['text', 'textarea', 'number', 'date', 'url', 'image', 'boolean'];
+
+        function fieldBuilderRow(field = {}) {
+            const wrap = document.createElement('div');
+            wrap.className = 'field-builder-row';
+            wrap.innerHTML = `
+                <input type="text" class="fb-name" placeholder="name" value="${escapeHtml(field.name || '')}">
+                <input type="text" class="fb-label" placeholder="Label" value="${escapeHtml(field.label || '')}">
+                <select class="fb-type">${fieldTypeOptions.map(t => `<option value="${t}" ${field.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
+                <label class="chk"><input type="checkbox" class="fb-required" ${field.required ? 'checked' : ''}> req</label>
+                <button type="button" class="btn btn-sm btn-danger fb-remove">✕</button>`;
+            wrap.querySelector('.fb-remove').addEventListener('click', () => wrap.remove());
+            return wrap;
         }
-    });
 
-    async function setBookingStatus(id, status) {
-        try {
-            const response = await fetch(`${API_URL}/bookings/${id}/status`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status })
-            });
-            if (response.ok) {
-                fetchBookings();
-            } else {
-                alert('Failed to update status.');
-            }
-        } catch (err) {
-            alert('Network error.');
-        }
-    }
+        document.getElementById('add-field').addEventListener('click', () => {
+            document.getElementById('field-builder').appendChild(fieldBuilderRow());
+        });
 
-    async function fetchBookings() {
-        const container = document.getElementById('bookings-container');
-        try {
-            const response = await fetch(`${API_URL}/bookings`);
-            const data = await response.json();
-
-            if (data.length === 0) {
-                container.innerHTML = '<div style="color: #aaa;">No incoming bookings.</div>';
-                return;
-            }
-
-            let html = `
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Name / Email</th>
-                            <th>Event Details</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            data.forEach(b => {
-                const statusColor = b.status === 'accepted' ? '#0f0' : (b.status === 'rejected' ? 'var(--danger-color)' : '#aaa');
-
-                html += `
-                    <tr>
-                        <td style="white-space: nowrap; vertical-align: top;">${new Date(b.created_at).toLocaleDateString()}</td>
-                        <td style="vertical-align: top;">
-                            <strong>${escapeHtml(b.name)}</strong><br>
-                            <span style="font-size:0.85rem; color:#aaa;">${escapeHtml(b.email)}</span>
-                        </td>
-                        <td style="vertical-align: top;">
-                            <strong>${escapeHtml(b.event_details || '-')}</strong><br>
-                            <span style="font-size:0.85rem; color:#888;">${escapeHtml(b.message || '-')}</span>
-                        </td>
-                        <td style="vertical-align: top; font-weight: 600; text-transform: uppercase; color: ${statusColor};">
-                            ${escapeHtml(b.status)}
-                        </td>
-                        <td style="vertical-align: top;">
-                            <div style="display:flex; gap:5px; flex-wrap:wrap;">
-                                ${b.status === 'pending' ? `<button class="btn" style="padding: 4px 10px; font-size:0.7rem;" onclick="setBookingStatus(${b.id}, 'accepted')">Accept</button>` : ''}
-                                ${b.status === 'pending' ? `<button class="btn btn-danger" style="padding: 4px 10px; font-size:0.7rem;" onclick="setBookingStatus(${b.id}, 'rejected')">Reject</button>` : ''}
-                                <button class="btn reply-btn" style="padding: 4px 10px; font-size:0.7rem; border-color:#888;" data-id="${b.id}" data-name="${escapeHtml(b.name)}" data-email="${escapeHtml(b.email)}" data-details="${escapeHtml(b.event_details || '')}">Reply</button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            html += '</tbody></table>';
-            container.innerHTML = html;
-
-            // Attach event listeners for reply buttons to prevent Stored XSS via inline onclick
-            document.querySelectorAll('.reply-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    openModal(
-                        this.getAttribute('data-id'),
-                        this.getAttribute('data-name'),
-                        this.getAttribute('data-email'),
-                        this.getAttribute('data-details')
-                    );
+        function collectFields() {
+            const rows = document.querySelectorAll('#field-builder .field-builder-row');
+            const fields = [];
+            rows.forEach(r => {
+                const name = r.querySelector('.fb-name').value.trim();
+                if (!name) return;
+                fields.push({
+                    name,
+                    label: r.querySelector('.fb-label').value.trim() || name,
+                    type: r.querySelector('.fb-type').value,
+                    required: r.querySelector('.fb-required').checked
                 });
             });
-        } catch (err) {
-            container.innerHTML = '<div style="color:var(--danger-color);">Error retrieving bookings.</div>';
+            return fields;
         }
-    }
 
-    async function fetchGigs() {
-        const container = document.getElementById('gigs-container');
-        try {
-            const response = await fetch('/api/gigs');
-            const data = await response.json();
+        function resetTypeForm() {
+            document.getElementById('type-id').value = '';
+            document.getElementById('type-name').value = '';
+            document.getElementById('type-slug').value = '';
+            document.getElementById('type-desc').value = '';
+            document.getElementById('field-builder').innerHTML = '';
+            document.getElementById('field-builder').appendChild(fieldBuilderRow());
+            document.getElementById('type-form-title').textContent = 'New content type';
+            document.getElementById('type-cancel').style.display = 'none';
+            setFeedback(document.getElementById('type-feedback'), '');
+        }
 
-            if (data.length === 0) {
-                container.innerHTML = '<div style="color: #aaa;">No gigs listed.</div>';
+        document.getElementById('type-cancel').addEventListener('click', resetTypeForm);
+
+        function editType(id) {
+            const t = contentTypes.find(x => x.id === id);
+            if (!t) return;
+            document.getElementById('type-id').value = t.id;
+            document.getElementById('type-name').value = t.name;
+            document.getElementById('type-slug').value = t.slug;
+            document.getElementById('type-desc').value = t.description || '';
+            const fb = document.getElementById('field-builder');
+            fb.innerHTML = '';
+            (t.fields || []).forEach(f => fb.appendChild(fieldBuilderRow(f)));
+            document.getElementById('type-form-title').textContent = 'Edit: ' + t.name;
+            document.getElementById('type-cancel').style.display = 'inline-block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function deleteType(id) {
+            const t = contentTypes.find(x => x.id === id);
+            if (!confirm(`Delete content type "${t ? t.name : id}" and ALL its entries?`)) return;
+            const res = await fetch(`${API}/content-types/${id}`, { method: 'DELETE' });
+            if (res.ok) { await loadTypes(); } else { alert('Failed to delete.'); }
+        }
+
+        document.getElementById('type-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const feedback = document.getElementById('type-feedback');
+            const id = document.getElementById('type-id').value;
+            const payload = {
+                name: document.getElementById('type-name').value.trim(),
+                slug: document.getElementById('type-slug').value.trim(),
+                description: document.getElementById('type-desc').value.trim(),
+                fields: collectFields()
+            };
+            setFeedback(feedback, 'Saving...');
+            try {
+                const res = await fetch(id ? `${API}/content-types/${id}` : `${API}/content-types`, {
+                    method: id ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+                if (res.ok || res.status === 201) {
+                    setFeedback(feedback, 'Saved.', true);
+                    resetTypeForm();
+                    await loadTypes();
+                } else {
+                    setFeedback(feedback, result.error || 'Failed to save.', false);
+                }
+            } catch (err) { setFeedback(feedback, 'Network error.', false); }
+        });
+
+        function renderTypesList() {
+            const el = document.getElementById('types-list');
+            if (contentTypes.length === 0) { el.innerHTML = '<p class="muted">No content types yet.</p>'; return; }
+            el.innerHTML = contentTypes.map(t => `
+                <div class="list-item">
+                    <div>
+                        <strong>${escapeHtml(t.name)}</strong> <span class="muted">/${escapeHtml(t.slug)}</span><br>
+                        <span class="muted" style="font-size:0.82rem;">
+                            ${(t.fields || []).map(f => escapeHtml(f.name)).join(', ')} · ${t.entryCount || 0} entries
+                        </span>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-sm btn-muted" data-edit-type="${t.id}">Edit</button>
+                        <button class="btn btn-sm btn-danger" data-del-type="${t.id}">Delete</button>
+                    </div>
+                </div>`).join('');
+            el.querySelectorAll('[data-edit-type]').forEach(b => b.addEventListener('click', () => editType(Number(b.dataset.editType))));
+            el.querySelectorAll('[data-del-type]').forEach(b => b.addEventListener('click', () => deleteType(Number(b.dataset.delType))));
+        }
+
+        async function loadTypes() {
+            const res = await fetch(`${API}/content-types`);
+            contentTypes = await res.json();
+            renderTypesList();
+            renderTypeSelect();
+        }
+
+        // =====================================================================
+        //  CONTENT ENTRIES
+        // =====================================================================
+        function renderTypeSelect() {
+            const sel = document.getElementById('type-select');
+            const prev = currentTypeSlug;
+            sel.innerHTML = contentTypes.map(t => `<option value="${escapeHtml(t.slug)}">${escapeHtml(t.name)}</option>`).join('');
+            if (contentTypes.length === 0) {
+                currentTypeSlug = null;
+                document.getElementById('entry-fields').innerHTML = '<p class="muted">Create a content type first.</p>';
+                document.getElementById('entries-list').innerHTML = '';
                 return;
             }
-
-            let html = '<div>';
-            data.forEach(gig => {
-                html += `
-                    <div class="gig-item">
-                        <div class="gig-info">
-                            <strong>${escapeHtml(gig.date)}</strong>
-                            ${escapeHtml(gig.location)}
-                            <span>${gig.genre ? '| ' + escapeHtml(gig.genre) : ''}</span>
-                        </div>
-                        <button class="btn btn-danger" style="padding: 6px 15px; font-size:0.75rem;" onclick="deleteGig(${gig.id})">Delete</button>
-                    </div>
-                `;
-            });
-            html += '</div>';
-            container.innerHTML = html;
-        } catch (err) {
-            container.innerHTML = '<div style="color:var(--danger-color);">Error retrieving gigs.</div>';
+            currentTypeSlug = contentTypes.some(t => t.slug === prev) ? prev : contentTypes[0].slug;
+            sel.value = currentTypeSlug;
+            buildEntryForm();
+            loadEntries();
         }
-    }
 
-    async function deleteGig(id) {
-        if (!confirm('Are you sure you want to delete this gig?')) return;
+        document.getElementById('type-select').addEventListener('change', (e) => {
+            currentTypeSlug = e.target.value;
+            resetEntryForm();
+            buildEntryForm();
+            loadEntries();
+        });
 
-        try {
-            const response = await fetch(`${API_URL}/gigs/${id}`, { method: 'DELETE' });
-            if (response.ok) {
-                fetchGigs();
-            } else {
-                alert('Failed to delete gig.');
+        function currentType() { return contentTypes.find(t => t.slug === currentTypeSlug); }
+
+        function fieldInput(field, value = '') {
+            const id = 'ef-' + field.name;
+            const req = field.required ? 'required' : '';
+            let control;
+            switch (field.type) {
+                case 'textarea': control = `<textarea id="${id}" rows="4" ${req}>${escapeHtml(value)}</textarea>`; break;
+                case 'number':   control = `<input type="number" id="${id}" value="${escapeHtml(value)}" ${req}>`; break;
+                case 'date':     control = `<input type="date" id="${id}" value="${escapeHtml(value)}" ${req}>`; break;
+                case 'url':
+                case 'image':    control = `<input type="url" id="${id}" value="${escapeHtml(value)}" placeholder="https://…" ${req}>`; break;
+                case 'boolean':  control = `<input type="checkbox" id="${id}" style="width:auto;" ${value ? 'checked' : ''}>`; break;
+                default:         control = `<input type="text" id="${id}" value="${escapeHtml(value)}" ${req}>`;
             }
-        } catch (err) {
-            alert('Deletion failed.');
+            return `<div><label for="${id}">${escapeHtml(field.label)}${field.required ? ' *' : ''}</label>${control}</div>`;
         }
-    }
 
-    document.getElementById('create-gig-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const feedback = document.getElementById('gig-feedback');
-        feedback.innerText = 'Processing...';
-        feedback.style.color = '#fff';
+        function buildEntryForm(values = {}) {
+            const type = currentType();
+            const container = document.getElementById('entry-fields');
+            if (!type) { container.innerHTML = ''; return; }
+            container.innerHTML = type.fields.map(f => fieldInput(f, values[f.name] !== undefined ? values[f.name] : '')).join('');
+        }
 
-        const payload = {
-            date: document.getElementById('date').value,
-            location: document.getElementById('location').value,
-            genre: document.getElementById('genre').value,
-            ticket_link: document.getElementById('ticket_link').value
-        };
-
-        try {
-            const response = await fetch(`${API_URL}/gigs`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+        function collectEntryData() {
+            const type = currentType();
+            const data = {};
+            type.fields.forEach(f => {
+                const el = document.getElementById('ef-' + f.name);
+                if (!el) return;
+                data[f.name] = f.type === 'boolean' ? el.checked : el.value;
             });
-
-            if (response.ok || response.status === 201) {
-                feedback.innerText = 'Gig successfully created.';
-                feedback.style.color = '#0f0';
-                document.getElementById('create-gig-form').reset();
-                fetchGigs();
-            } else {
-                feedback.innerText = 'Failed to create gig.';
-                feedback.style.color = 'var(--danger-color)';
-            }
-        } catch (err) {
-            feedback.innerText = 'Network error.';
-            feedback.style.color = 'var(--danger-color)';
+            return data;
         }
-    });
 
-    // Utility to prevent XSS
-    function escapeHtml(unsafe) {
-        if (!unsafe) return '';
-        return unsafe
-            .toString()
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
+        function resetEntryForm() {
+            document.getElementById('entry-id').value = '';
+            document.getElementById('entry-status').value = 'published';
+            document.getElementById('entry-form-title').textContent = 'New entry';
+            document.getElementById('entry-cancel').style.display = 'none';
+            setFeedback(document.getElementById('entry-feedback'), '');
+            buildEntryForm();
+        }
 
-    // Init
-    loadSettings();
-    fetchBookings();
-    fetchGigs();
-</script>
+        document.getElementById('entry-cancel').addEventListener('click', resetEntryForm);
+
+        function editEntry(entry) {
+            document.getElementById('entry-id').value = entry.id;
+            document.getElementById('entry-status').value = entry.status || 'published';
+            document.getElementById('entry-form-title').textContent = 'Edit entry #' + entry.id;
+            document.getElementById('entry-cancel').style.display = 'inline-block';
+            buildEntryForm(entry.data || {});
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.getElementById('entry-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const feedback = document.getElementById('entry-feedback');
+            const id = document.getElementById('entry-id').value;
+            const payload = { data: collectEntryData(), status: document.getElementById('entry-status').value };
+            setFeedback(feedback, 'Saving...');
+            try {
+                const url = id ? `${API}/content/${currentTypeSlug}/${id}` : `${API}/content/${currentTypeSlug}`;
+                const res = await fetch(url, {
+                    method: id ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+                if (res.ok || res.status === 201) {
+                    setFeedback(feedback, 'Saved.', true);
+                    resetEntryForm();
+                    loadEntries();
+                    loadTypes(); // refresh entry counts
+                } else {
+                    setFeedback(feedback, result.error || 'Failed to save.', false);
+                }
+            } catch (err) { setFeedback(feedback, 'Network error.', false); }
+        });
+
+        async function deleteEntry(id) {
+            if (!confirm('Delete this entry?')) return;
+            const res = await fetch(`${API}/content/${currentTypeSlug}/${id}`, { method: 'DELETE' });
+            if (res.ok) { loadEntries(); loadTypes(); } else { alert('Failed to delete.'); }
+        }
+
+        async function loadEntries() {
+            const list = document.getElementById('entries-list');
+            const type = currentType();
+            if (!type) { list.innerHTML = ''; return; }
+            list.innerHTML = '<p class="muted">Loading…</p>';
+            try {
+                const res = await fetch(`${API}/content/${currentTypeSlug}`);
+                const data = await res.json();
+                const entries = data.entries || [];
+                if (entries.length === 0) { list.innerHTML = '<p class="muted">No entries yet.</p>'; return; }
+                const titleField = type.fields.find(f => f.name === 'title') || type.fields.find(f => f.type === 'text') || type.fields[0];
+                list.innerHTML = entries.map(entry => {
+                    const title = titleField ? entry.data[titleField.name] : '';
+                    const color = entry.status === 'published' ? 'var(--ok-color)' : '#aaa';
+                    return `
+                        <div class="list-item">
+                            <div>
+                                <strong>${escapeHtml(title) || '(untitled)'}</strong>
+                                <span class="pill" style="color:${color}; border:1px solid ${color};">${escapeHtml(entry.status)}</span><br>
+                                <span class="muted" style="font-size:0.8rem;">#${entry.id} · ${new Date(entry.created_at).toLocaleString()}</span>
+                            </div>
+                            <div class="actions">
+                                <button class="btn btn-sm btn-muted" data-edit="${entry.id}">Edit</button>
+                                <button class="btn btn-sm btn-danger" data-del="${entry.id}">Delete</button>
+                            </div>
+                        </div>`;
+                }).join('');
+                list.querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', () => {
+                    editEntry(entries.find(x => x.id === Number(b.dataset.edit)));
+                }));
+                list.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => deleteEntry(Number(b.dataset.del))));
+            } catch (err) { list.innerHTML = '<p class="muted">Error loading entries.</p>'; }
+        }
+
+        // =====================================================================
+        //  MESSAGES
+        // =====================================================================
+        const replyModal = document.getElementById('reply-modal');
+
+        function openReply(id, name, email) {
+            document.getElementById('reply-id').value = id;
+            document.getElementById('reply-email').value = email;
+            document.getElementById('reply-info').textContent = `To: ${name} <${email}>`;
+            document.getElementById('reply-subject').value = 'Re: your message';
+            document.getElementById('reply-message').value = '';
+            setFeedback(document.getElementById('reply-feedback'), '');
+            replyModal.classList.add('open');
+        }
+        document.getElementById('reply-cancel').addEventListener('click', () => replyModal.classList.remove('open'));
+        replyModal.addEventListener('click', (e) => { if (e.target === replyModal) replyModal.classList.remove('open'); });
+
+        document.getElementById('reply-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const feedback = document.getElementById('reply-feedback');
+            setFeedback(feedback, 'Sending…');
+            try {
+                const res = await fetch(`${API}/messages/${document.getElementById('reply-id').value}/reply`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: document.getElementById('reply-email').value,
+                        subject: document.getElementById('reply-subject').value,
+                        replyMessage: document.getElementById('reply-message').value
+                    })
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    setFeedback(feedback, 'Sent.', true);
+                    setTimeout(() => { replyModal.classList.remove('open'); loadMessages(); }, 1200);
+                } else {
+                    setFeedback(feedback, result.error || 'Failed to send.', false);
+                }
+            } catch (err) { setFeedback(feedback, 'Network error.', false); }
+        });
+
+        async function setMessageStatus(id, status) {
+            const res = await fetch(`${API}/messages/${id}/status`, {
+                method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status })
+            });
+            if (res.ok) loadMessages(); else alert('Failed to update.');
+        }
+        async function deleteMessage(id) {
+            if (!confirm('Delete this message?')) return;
+            const res = await fetch(`${API}/messages/${id}`, { method: 'DELETE' });
+            if (res.ok) loadMessages(); else alert('Failed to delete.');
+        }
+
+        async function loadMessages() {
+            const list = document.getElementById('messages-list');
+            list.innerHTML = '<p class="muted">Loading…</p>';
+            try {
+                const res = await fetch(`${API}/messages`);
+                const data = await res.json();
+                if (!Array.isArray(data) || data.length === 0) { list.innerHTML = '<p class="muted">No messages.</p>'; return; }
+                list.innerHTML = `<table><thead><tr><th>Date</th><th>From</th><th>Message</th><th>Status</th><th>Actions</th></tr></thead><tbody>${
+                    data.map(m => {
+                        const color = m.status === 'new' ? 'var(--primary-color)' : m.status === 'archived' ? '#888' : 'var(--ok-color)';
+                        return `<tr>
+                            <td style="white-space:nowrap;">${new Date(m.created_at).toLocaleDateString()}</td>
+                            <td><strong>${escapeHtml(m.name)}</strong><br><span class="muted" style="font-size:0.8rem;">${escapeHtml(m.email)}</span></td>
+                            <td><strong>${escapeHtml(m.subject || '')}</strong><br><span class="muted" style="font-size:0.82rem;">${escapeHtml(m.body || '')}</span></td>
+                            <td style="color:${color}; text-transform:uppercase; font-weight:600; font-size:0.75rem;">${escapeHtml(m.status)}</td>
+                            <td><div class="actions">
+                                <button class="btn btn-sm" data-reply="${m.id}" data-name="${escapeHtml(m.name)}" data-email="${escapeHtml(m.email)}">Reply</button>
+                                ${m.status !== 'read' ? `<button class="btn btn-sm btn-muted" data-status="read" data-id="${m.id}">Read</button>` : ''}
+                                ${m.status !== 'archived' ? `<button class="btn btn-sm btn-muted" data-status="archived" data-id="${m.id}">Archive</button>` : ''}
+                                <button class="btn btn-sm btn-danger" data-delmsg="${m.id}">Delete</button>
+                            </div></td>
+                        </tr>`;
+                    }).join('')
+                }</tbody></table>`;
+                list.querySelectorAll('[data-reply]').forEach(b => b.addEventListener('click', () => openReply(b.dataset.reply, b.dataset.name, b.dataset.email)));
+                list.querySelectorAll('[data-status]').forEach(b => b.addEventListener('click', () => setMessageStatus(b.dataset.id, b.dataset.status)));
+                list.querySelectorAll('[data-delmsg]').forEach(b => b.addEventListener('click', () => deleteMessage(b.dataset.delmsg)));
+            } catch (err) { list.innerHTML = '<p class="muted">Error loading messages.</p>'; }
+        }
+
+        // =====================================================================
+        //  SETTINGS
+        // =====================================================================
+        async function loadSettings() {
+            const res = await fetch(`${API}/settings`);
+            const data = await res.json();
+            siteSchema = data.schema || [];
+            const site = data.site || {};
+            document.getElementById('admin-title').textContent = (site.site_name || 'CMS') + ' Admin';
+            document.getElementById('settings-fields').innerHTML = siteSchema.map(f => {
+                const val = site[f.key] !== undefined ? site[f.key] : '';
+                const control = f.type === 'textarea'
+                    ? `<textarea id="set-${f.key}" rows="3">${escapeHtml(val)}</textarea>`
+                    : `<input type="${f.type === 'url' ? 'url' : 'text'}" id="set-${f.key}" value="${escapeHtml(val)}">`;
+                return `<label for="set-${f.key}">${escapeHtml(f.label)}</label>${control}`;
+            }).join('');
+        }
+
+        document.getElementById('settings-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const feedback = document.getElementById('settings-feedback');
+            setFeedback(feedback, 'Saving…');
+            try {
+                for (const f of siteSchema) {
+                    const value = document.getElementById('set-' + f.key).value;
+                    const res = await fetch(`${API}/settings`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ key: f.key, value })
+                    });
+                    if (!res.ok) throw new Error('Failed for ' + f.key);
+                }
+                setFeedback(feedback, 'Settings saved.', true);
+            } catch (err) { setFeedback(feedback, 'Failed to save some settings.', false); }
+        });
+
+        // ---- init ----
+        (async function init() {
+            await loadTypes();
+            await loadSettings();
+        })();
+    </script>
 </body>
 </html>

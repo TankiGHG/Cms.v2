@@ -1,9 +1,10 @@
 {
-  "name": "app",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "cms-v2",
+  "version": "2.0.0",
+  "description": "A lightweight, generic content-management system (Node.js + Express + SQLite) usable as a foundation for any content-driven website.",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

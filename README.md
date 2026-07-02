@@ -1,96 +1,120 @@
-# DJ JAGGER Terminal CMS
+# CMS.v2 — Lightweight Generic CMS
 
-![Hero Image](./docs/hero-screenshot.png)
-
-Ein minimalistisches, extrem performantes Content-Management-System und Backend, das exklusiv für "DJ JAGGER" entwickelt wurde. Das gesamte System verzichtet komplett auf UI-Bloatware und präsentiert sich in einer strikten, an Retro-Hacker-Konsolen angelehnten Terminal-Aesthetic.
-
-## Mission
-Das Ziel dieses Projekts ist es, eine digitale Visitenkarte zu bieten, die nicht nur optisch durch ihre Einfachheit und ihren Geek-Faktor (ASCII Art, Monospace, Dark Mode) auffällt, sondern auch technisch extrem leichtgewichtig, stabil und sicher ist. Alles läuft in einem schlanken Docker-Container.
+Ein leichtgewichtiges, generisches Content-Management-System auf Basis von **Node.js + Express + SQLite**. Gedacht als **Grundlage/Vorlage** für beliebige inhaltsgetriebene Websites: Inhaltstypen mit frei definierbaren Feldern, ein geschütztes Admin-Panel, ein generisches Kontaktformular und komplett über Config/Admin konfigurierbares Branding. Kein Build-Step, kein Framework im Frontend — pure HTML/CSS/Vanilla JS.
 
 ---
 
 ## Features
 
-- **Terminal-Style Frontend:** Pure HTML, CSS und Vanilla JS. Kein React, kein Bootstrap. Grüner Text auf schwarzem Hintergrund mit blinkendem Cursor.
-- **Gig-Verwaltung:** Admin-Dashboard zum einfachen Anlegen und Löschen von anstehenden Auftritten.
-- **Booking-Mailer:** Direkte Integration von Nodemailer zur Anbindung an einen Mailcow-Server. Booking-Anfragen werden sowohl in der Datenbank gesichert als auch sofort per E-Mail an den DJ weitergeleitet.
-- **SQLite Persistenz:** Keine externen Datenbank-Server nötig. Alle Gigs, Mixes und Bookings werden sicher in einer lokalen SQLite-Datei gespeichert (via Docker-Volumes).
-- **Basic Auth Security:** Das gesamte Admin-Dashboard und die zugehörigen API-Endpunkte sind robust durch HTTP Basic Auth abgesichert.
+- **Generisches Inhaltsmodell:** Lege beliebige *Content-Types* (z. B. Posts, Events, Projekte) mit eigenen Feldern an. Unterstützte Feldtypen: `text`, `textarea`, `number`, `date`, `url`, `image`, `boolean`.
+- **Admin-Panel:** Tabs für Inhalte, Inhaltstypen (Feld-Builder), Nachrichten und Einstellungen. Dynamische Formulare, die sich automatisch aus der Felddefinition ergeben. Draft/Published-Status pro Eintrag.
+- **Konfigurierbares Branding:** Name, Logo, Tagline, Hero-Texte/-Bild, Farben, Footer usw. Defaults kommen aus `config.js`/`.env` und sind **zur Laufzeit im Admin-Panel überschreibbar** (in der `settings`-Tabelle gespeichert).
+- **Kontakt/Nachrichten:** Generisches Kontaktformular; Nachrichten werden gespeichert, optional per E-Mail benachrichtigt und lassen sich im Admin-Panel beantworten, als gelesen/archiviert markieren oder löschen.
+- **Optionaler Mailer:** Nodemailer/SMTP. Ist kein `SMTP_HOST` gesetzt, läuft die App trotzdem — E-Mail-Funktionen sind dann deaktiviert.
+- **SQLite-Persistenz:** Keine externe Datenbank nötig. Beim ersten Start werden Tabellen angelegt und Beispiel-Inhaltstypen (`posts`, `events`) geseedet.
+- **Basic-Auth-Schutz:** Admin-Oberfläche und alle `/api/admin`-Endpunkte sind per HTTP Basic Auth geschützt.
+- **XSS-Schutz:** Ausgaben werden im Frontend escaped.
 
 ---
 
 ## Tech-Stack
 
-*   **Frontend:** HTML5, CSS3 (Custom Properties, Keyframes), Vanilla JavaScript (Fetch API).
-*   **Backend:** Node.js, Express.js.
-*   **Datenbank:** SQLite3.
-*   **Mailer:** Nodemailer (SMTP).
-*   **Deployment:** Docker & Docker Compose.
+- **Backend:** Node.js, Express.js
+- **Datenbank:** SQLite3
+- **Mailer:** Nodemailer (SMTP, optional)
+- **Frontend:** HTML5, CSS3, Vanilla JavaScript (Fetch API)
+- **Deployment:** Docker & Docker Compose
 
 ---
 
-## Screenshots
+## Datenmodell
 
-### Frontend / Landing Page
-![Frontend Screenshot](./docs/frontend-screenshot.png)
-
-### Admin Dashboard
-![Admin Dashboard Screenshot](./docs/admin-screenshot.png)
+| Tabelle | Zweck |
+|---|---|
+| `content_types` | Definition der Inhaltstypen (`slug`, `name`, `description`, `fields` als JSON). |
+| `content_entries` | Einzelne Einträge (`type_id`, `data` als JSON, `status`, Zeitstempel). |
+| `messages` | Kontaktanfragen (`name`, `email`, `subject`, `body`, `status`). |
+| `settings` | Laufzeit-Overrides für Branding/Texte (Key/Value). |
 
 ---
 
-## Setup & Deployment (Schritt-für-Schritt)
+## API-Übersicht
 
-Dieses Projekt ist für ein blitzschnelles Deployment via Docker optimiert und verfügt über ein interaktives Setup-Skript.
+**Öffentlich**
+- `GET /api/config` — Branding + Liste der Inhaltstypen
+- `GET /api/content/:slug` — veröffentlichte Einträge eines Typs
+- `GET /api/content/:slug/:id` — einzelner Eintrag
+- `POST /api/messages` — Kontaktnachricht senden
+
+**Admin (Basic Auth)**
+- `GET|POST /api/admin/content-types`, `PUT|DELETE /api/admin/content-types/:id`
+- `GET|POST /api/admin/content/:slug`, `PUT|DELETE /api/admin/content/:slug/:id`
+- `GET /api/admin/messages`, `PUT /api/admin/messages/:id/status`, `POST /api/admin/messages/:id/reply`, `DELETE /api/admin/messages/:id`
+- `GET|POST /api/admin/settings`
+
+---
+
+## Setup & Deployment
 
 ### 1. Repository klonen
 ```bash
-git clone https://github.com/dein-username/dj-jagger-cms.git
-cd dj-jagger-cms
+git clone https://github.com/TankiGHG/Cms.v2.git
+cd Cms.v2
 ```
 
 ### 2. Setup-Skript ausführen
-Führe das beiliegende Installations-Skript aus. Es fragt automatisch alle wichtigen Konfigurationen (Admin-Passwort, SMTP-Daten, Port) ab und generiert die `.env`-Datei.
+Fragt Port, Admin-Zugang, Branding und (optional) SMTP ab und erzeugt die `.env`-Datei:
 ```bash
 chmod +x install.sh
 ./install.sh
 ```
 
-Am Ende des Skripts wirst du gefragt, ob du den Docker-Container direkt starten möchtest. Bestätige dies mit `y`.
-
-### 3. Manuelles Starten (Optional)
-Falls du den Container später manuell starten möchtest, nutze:
+### 3. Starten
+Per Docker:
 ```bash
 docker compose up -d --build
 ```
+Oder lokal ohne Docker:
+```bash
+npm install
+cp .env.example .env   # anpassen
+npm start
+```
 
-Das war's! Die Website ist nun (standardmäßig) unter `http://localhost:3000` erreichbar.
-Das Admin-Dashboard findest du unter `http://localhost:3000/admin` (Logge dich mit den Daten ein, die du im Setup vergeben hast).
+Website: `http://localhost:3000` · Admin: `http://localhost:3000/admin`
+
+---
+
+## Als Vorlage nutzen
+
+1. `config.js` anpassen — Standard-Branding (`siteSchema`) und Start-Inhaltstypen (`seedContentTypes`).
+2. App starten und im Admin-Panel unter **Content Types** eigene Typen/Felder definieren.
+3. Unter **Content** Einträge pflegen, unter **Settings** Branding feinjustieren.
+
+Die öffentliche Seite rendert automatisch für jeden Inhaltstyp eine Sektion und stellt die Felder passend zum Feldtyp dar (Bilder, Links, Datumsangaben usw.).
 
 ---
 
 ## Ordnerstruktur
 
 ```text
-dj-jagger-cms/
-│
-├── public/                 # Statische Frontend-Dateien (ohne Build-Step!)
-│   ├── index.html          # Das öffentliche Terminal-Frontend
+Cms.v2/
+├── config.js               # Zentrale Defaults: Branding-Schema, Seed-Inhaltstypen, Feldtypen
+├── server.js               # Express-Backend, API-Routen, SQLite, Mailer
+├── public/
+│   ├── index.html          # Öffentliche, generische Seite
 │   └── admin/
-│       └── index.html      # Das geschützte Admin-Dashboard
-│
-├── data/                   # Docker-Volume für Persistenz
-│   └── database.sqlite     # (Wird beim ersten Start automatisch generiert)
-│
-├── .env.example            # Vorlage für Secrets
-├── .gitignore
-├── docker-compose.yml      # Container-Orchestrierung & Volume-Mapping
-├── Dockerfile              # Node.js Image Bauplan
-├── package.json            # Node-Abhängigkeiten
-└── server.js               # Express Backend, API-Routen, SQLite & Mailer-Logik
+│       └── index.html      # Admin-Panel (Inhalte, Typen, Nachrichten, Einstellungen)
+├── data/
+│   └── database.sqlite     # Wird beim ersten Start erzeugt (Docker-Volume)
+├── .env.example            # Konfigurationsvorlage
+├── docker-compose.yml
+├── Dockerfile
+├── install.sh              # Interaktives Setup
+└── package.json
 ```
 
 ---
 
 ## Lizenz
-Dieses Projekt wurde exklusiv für DJ JAGGER entwickelt.
+ISC.

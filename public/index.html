@@ -3,513 +3,343 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DJ JAGGER - Official Website</title>
+    <title>Loading…</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600;900&display=swap" rel="stylesheet">
     <style>
-        /* Edge/Chromium: clip schneidet stärker ab als „hidden“ (kein horizontales Scrollen durch Schatten/Subpixel) */
-        html {
-            overflow-x: clip;
-            max-width: 100%;
-            -webkit-text-size-adjust: 100%;
-            text-size-adjust: 100%;
-        }
+        html { overflow-x: clip; max-width: 100%; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+        @supports not (overflow: clip) { html { overflow-x: hidden; } }
 
-        @supports not (overflow: clip) {
-            html {
-                overflow-x: hidden;
-            }
-        }
-
-        /* Body / Vorschau / Admin-Link (liegen außerhalb .dj-page) */
-        body {
-            margin: 0;
-            min-height: 100vh;
-            min-height: 100dvh;
-            background: #050505;
-            overflow-x: clip;
-            max-width: 100%;
-        }
-
-        @supports not (overflow: clip) {
-            body {
-                overflow-x: hidden;
-            }
-        }
-
-        #page-root {
-            display: block;
-            width: 100%;
-            max-width: 100%;
-            overflow-x: clip;
-            min-width: 0;
-        }
-
-        @supports not (overflow: clip) {
-            #page-root {
-                overflow-x: hidden;
-            }
-        }
-
-        /* Gemeinsame Styles — geräteadaptiv, Farben über CSS-Variablen */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif;
-            scroll-behavior: smooth;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                scroll-behavior: auto;
-            }
-            .dj-page .hero h1 {
-                animation: none;
-            }
-            .dj-page .gig-card,
-            .dj-page .btn {
-                transition: none;
-            }
-        }
-
-        .dj-page {
+        :root {
             --primary-color: #ff3366;
             --secondary-color: #7b2cbf;
             --page-bg: #050505;
-            --surface-bg: #080808;
+            --surface-bg: #0a0a0a;
             --page-pad-x: clamp(12px, 4vw, 28px);
             --section-pad-y: clamp(48px, 10vw, 100px);
-            background-color: var(--page-bg);
-            color: #ffffff;
-            overflow-x: clip;
-            min-height: 100vh;
-            min-height: 100dvh;
-            width: 100%;
-            max-width: 100%;
-            min-width: 0;
-            padding-left: env(safe-area-inset-left, 0px);
-            padding-right: env(safe-area-inset-right, 0px);
-            padding-bottom: max(0px, env(safe-area-inset-bottom, 0px));
         }
 
-        @supports not (overflow: clip) {
-            .dj-page {
-                overflow-x: hidden;
-            }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; scroll-behavior: smooth; }
+
+        body {
+            min-height: 100vh; min-height: 100dvh;
+            background: var(--page-bg); color: #fff;
+            overflow-x: clip; max-width: 100%;
+        }
+        @supports not (overflow: clip) { body { overflow-x: hidden; } }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { scroll-behavior: auto; }
+            .hero h1 { animation: none; }
         }
 
-        /* Navigation Glassmorphism */
-        .dj-navbar {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
+        /* Navbar */
+        .navbar {
+            position: fixed; top: 0; width: 100%; z-index: 1000;
             background: rgba(5, 5, 5, 0.7);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             padding: 15px var(--page-pad-x);
         }
-
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .nav-logo {
-            color: #fff;
-            font-weight: 900;
-            font-size: 1.5rem;
-            text-decoration: none;
-            letter-spacing: 2px;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .nav-links ul { list-style: none; display: flex; gap: 20px; }
+        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+        .nav-logo { color: #fff; font-weight: 900; font-size: 1.5rem; text-decoration: none; letter-spacing: 2px; }
+        .nav-links { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
         .nav-links a { color: #ccc; text-decoration: none; font-weight: 600; transition: color 0.3s; }
         .nav-links a:hover { color: var(--primary-color); }
         .nav-btn { padding: 8px 20px; font-size: 0.9rem; min-width: auto; min-height: auto; }
 
-        .dj-page .hero {
-            width: 100%;
-            max-width: 100%;
-            overflow-x: clip;
-            min-height: 100vh;
-            min-height: 100dvh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
+        /* Hero */
+        .hero {
+            width: 100%; max-width: 100%; overflow-x: clip;
+            min-height: 100vh; min-height: 100dvh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
             padding: max(24px, env(safe-area-inset-top, 0px)) var(--page-pad-x) 32px;
-            background: linear-gradient(to bottom, rgba(5, 5, 5, 0.35), rgba(5, 5, 5, 0.92)),
-                var(--hero-bg-image, url('https://images.unsplash.com/photo-1516873240891-4bf014598ab4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')) center/cover;
-            background-attachment: scroll;
+            background: linear-gradient(to bottom, rgba(5,5,5,0.35), rgba(5,5,5,0.92)), var(--hero-bg) center/cover;
         }
-
-        .dj-page .hero h1 {
-            font-size: clamp(1.85rem, 6.5vw + 0.5rem, 5rem);
-            font-weight: 900;
-            letter-spacing: clamp(0.5px, 0.55vw, 6px);
-            text-transform: uppercase;
+        .hero h1 {
+            font-size: clamp(1.85rem, 6.5vw + 0.5rem, 5rem); font-weight: 900;
+            letter-spacing: clamp(0.5px, 0.55vw, 6px); text-transform: uppercase;
             text-shadow: 0 0 16px rgba(255, 51, 102, 0.45);
-            margin-bottom: clamp(8px, 2vw, 14px);
-            line-height: 1.05;
-            max-width: 100%;
-            width: 100%;
-            box-sizing: border-box;
-            word-wrap: break-word;
-            overflow-wrap: anywhere;
+            margin-bottom: clamp(8px, 2vw, 14px); line-height: 1.05;
+            max-width: 100%; word-wrap: break-word; overflow-wrap: anywhere;
             animation: pulseGlow 3s infinite alternate;
         }
-
-        .dj-page .hero p.genres {
-            font-size: clamp(0.85rem, 2.2vw + 0.35rem, 1.2rem);
-            font-weight: 300;
-            letter-spacing: clamp(1px, 0.35vw, 3px);
-            margin-bottom: clamp(24px, 5vw, 40px);
-            color: #d1d1d1;
-            max-width: min(36rem, 100%);
-            line-height: 1.45;
+        .hero p.tagline {
+            font-size: clamp(0.85rem, 2.2vw + 0.35rem, 1.2rem); font-weight: 300;
+            letter-spacing: clamp(1px, 0.35vw, 3px); margin-bottom: clamp(24px, 5vw, 40px);
+            color: #d1d1d1; max-width: min(40rem, 100%); line-height: 1.5;
         }
 
-        .dj-page .btn {
-            background: transparent;
-            color: #fff;
-            border: 2px solid var(--primary-color);
+        .btn {
+            background: transparent; color: #fff; border: 2px solid var(--primary-color);
             padding: max(14px, 0.9em) clamp(22px, 5vw, 40px);
-            font-size: clamp(0.85rem, 1.8vw + 0.4rem, 1.1rem);
-            font-weight: 600;
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: clamp(1px, 0.25vw, 2px);
-            cursor: pointer;
-            border-radius: 50px;
+            font-size: clamp(0.85rem, 1.8vw + 0.4rem, 1.1rem); font-weight: 600;
+            text-decoration: none; text-transform: uppercase; letter-spacing: clamp(1px, 0.25vw, 2px);
+            cursor: pointer; border-radius: 50px;
             transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
-            display: inline-block;
-            min-height: 44px;
-            min-width: min(100%, 12rem);
-            line-height: 1.2;
-            text-align: center;
+            display: inline-block; min-height: 44px; line-height: 1.2; text-align: center;
         }
-
         @media (hover: hover) and (pointer: fine) {
-            .dj-page .btn:hover {
-                background: var(--primary-color);
-                box-shadow: 0 0 25px var(--primary-color);
-                transform: scale(1.05);
-            }
+            .btn:hover { background: var(--primary-color); box-shadow: 0 0 25px var(--primary-color); transform: scale(1.05); }
         }
 
-        .dj-page .gigs-section {
-            padding: var(--section-pad-y) 0;
-            text-align: center;
-            background-color: var(--page-bg);
-        }
+        section.block { padding: var(--section-pad-y) 0; text-align: center; }
+        section.block:nth-of-type(even) { background: var(--surface-bg); }
 
-        .dj-page .section-title {
-            font-size: clamp(1.35rem, 4vw + 0.5rem, 2.5rem);
-            font-weight: 900;
-            margin-bottom: clamp(28px, 6vw, 50px);
-            text-transform: uppercase;
-            letter-spacing: clamp(1px, 0.4vw, 2px);
-            padding: 0 var(--page-pad-x);
-            line-height: 1.15;
-            max-width: 100%;
+        .section-title {
+            font-size: clamp(1.35rem, 4vw + 0.5rem, 2.5rem); font-weight: 900;
+            margin-bottom: clamp(10px, 2vw, 16px); text-transform: uppercase;
+            letter-spacing: clamp(1px, 0.4vw, 2px); padding: 0 var(--page-pad-x); line-height: 1.15;
         }
+        .section-desc { color: #aaa; margin-bottom: clamp(28px, 6vw, 50px); padding: 0 var(--page-pad-x); }
 
-        .dj-page .section-title span {
-            color: var(--primary-color);
+        .cards {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+            gap: clamp(14px, 3vw, 24px); width: 100%; max-width: min(1000px, 100%);
+            margin: 0 auto; padding: 0 var(--page-pad-x); text-align: left;
         }
-
-        .dj-page .gigs-container {
-            display: flex;
-            flex-direction: column;
-            gap: clamp(12px, 3vw, 20px);
-            width: 100%;
-            max-width: min(800px, 100%);
-            margin: 0 auto;
-            padding: 0 var(--page-pad-x);
-        }
-
-        .dj-page .gig-card {
+        .card {
             background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: clamp(16px, 4vw, 25px);
-            border-radius: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: clamp(10px, 2vw, 16px);
-            transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
-            text-align: left;
-            width: 100%;
-            max-width: 100%;
-            min-width: 0;
-            overflow-x: clip;
+            border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 15px;
+            overflow: hidden; transition: border-color 0.35s ease, transform 0.35s ease, box-shadow 0.35s ease;
+            display: flex; flex-direction: column;
         }
-
         @media (hover: hover) and (pointer: fine) {
-            .dj-page .gig-card:hover {
-                transform: translateY(-6px) scale(1.01);
-                border-color: rgba(255, 51, 102, 0.6);
-                box-shadow: 0 15px 35px rgba(255, 51, 102, 0.15);
-            }
+            .card:hover { transform: translateY(-6px); border-color: rgba(255, 51, 102, 0.6); box-shadow: 0 15px 35px rgba(255, 51, 102, 0.15); }
         }
+        .card img { width: 100%; height: 180px; object-fit: cover; display: block; }
+        .card-body { padding: clamp(16px, 4vw, 22px); display: flex; flex-direction: column; gap: 8px; }
+        .card-title { font-size: 1.2rem; font-weight: 900; }
+        .card-field { font-size: 0.92rem; color: #ccc; overflow-wrap: anywhere; }
+        .card-field .lbl { color: var(--primary-color); font-weight: 600; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 1px; display: block; }
+        .card .btn { align-self: flex-start; padding: 8px 18px; font-size: 0.8rem; margin-top: 6px; }
+        .empty { color: #888; padding: 0 var(--page-pad-x); }
 
-        .dj-page .gig-date {
-            font-size: clamp(1rem, 2.2vw + 0.4rem, 1.2rem);
-            font-weight: 900;
-            color: #fff;
-            flex: 1 1 22%;
-            min-width: 0;
+        /* Contact form */
+        .contact-container {
+            max-width: 600px; margin: 0 auto; text-align: left;
+            background: rgba(255, 255, 255, 0.02); padding: clamp(24px, 6vw, 40px);
+            border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.05);
         }
-
-        .dj-page .gig-location {
-            font-size: clamp(0.9rem, 1.8vw + 0.35rem, 1.1rem);
-            font-weight: 600;
-            color: #ddd;
-            flex: 2 1 40%;
-            min-width: 0;
-            overflow-wrap: anywhere;
-            word-break: break-word;
-        }
-
-        .dj-page .gig-genre {
-            font-size: clamp(0.75rem, 1.5vw + 0.25rem, 0.9rem);
-            font-weight: 600;
-            color: var(--primary-color);
-            background: rgba(255, 51, 102, 0.1);
-            padding: 6px 14px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            flex: 0 1 auto;
-            text-align: center;
-        }
-
-        .dj-page .mixes-section {
-            padding: var(--section-pad-y) 0;
-            text-align: center;
-            background-color: var(--surface-bg);
-        }
-
-        /* Booking Formular */
-        .booking-container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.02);
-            padding: 40px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .form-group { margin-bottom: 25px; text-align: left; }
-        .form-group label { display: block; margin-bottom: 8px; color: #aaa; font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .form-group { margin-bottom: 22px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #aaa; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
         .form-group input, .form-group textarea {
-            width: 100%;
-            background: #111;
-            border: 1px solid #333;
-            padding: 15px;
-            border-radius: 10px;
-            color: #fff;
-            font-family: inherit;
-            transition: all 0.3s ease;
+            width: 100%; background: #111; border: 1px solid #333; padding: 14px;
+            border-radius: 10px; color: #fff; font-family: inherit; transition: all 0.3s ease;
         }
         .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 15px rgba(255, 51, 102, 0.2); }
-        .booking-submit { width: 100%; margin-top: 10px; }
+        .contact-submit { width: 100%; margin-top: 4px; }
+        #form-feedback { margin-top: 18px; font-weight: bold; }
 
         @keyframes pulseGlow {
-            0% {
-                text-shadow: 0 0 8px rgba(255, 51, 102, 0.35);
-            }
-            100% {
-                text-shadow: 0 0 20px rgba(255, 51, 102, 0.75), 0 0 6px rgba(255, 255, 255, 0.35);
-            }
+            0% { text-shadow: 0 0 8px rgba(255, 51, 102, 0.35); }
+            100% { text-shadow: 0 0 20px rgba(255, 51, 102, 0.75), 0 0 6px rgba(255, 255, 255, 0.35); }
         }
 
-        .dj-page .social-footer {
-            padding: clamp(36px, 8vw, 50px) var(--page-pad-x);
-            text-align: center;
-            background: var(--surface-bg);
-            border-top: 1px solid #111;
-        }
-
-        #form-feedback {
-            margin-top: 20px;
-            font-weight: bold;
-        }
+        footer { padding: clamp(36px, 8vw, 50px) var(--page-pad-x); text-align: center; background: var(--surface-bg); border-top: 1px solid #111; }
+        footer p { color: #666; font-size: 0.9rem; }
+        .admin-link { color: #444; font-size: 0.8rem; text-decoration: none; }
+        .admin-link:hover { color: var(--primary-color); }
     </style>
 </head>
 <body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo" id="nav-logo">…</a>
+            <div class="nav-links" id="nav-links">
+                <a href="#contact" class="btn nav-btn" id="nav-cta">Contact</a>
+            </div>
+        </div>
+    </nav>
 
-<div id="page-root">
-    <div class="dj-page">
-        <!-- Navbar -->
-        <nav class="dj-navbar">
-            <div class="nav-container">
-                <a href="#" class="nav-logo">JAGGER</a>
-                <div class="nav-links">
-                    <ul>
-                        <li><a href="#gigs">Gigs</a></li>
-                    </ul>
-                    <a href="#booking" class="btn nav-btn">Book Now</a>
+    <header class="hero" id="hero">
+        <h1 id="hero-title">…</h1>
+        <p class="tagline" id="hero-subtitle"></p>
+        <a href="#contact" class="btn" id="hero-cta">Contact</a>
+    </header>
+
+    <main id="content-sections"></main>
+
+    <section class="block" id="contact">
+        <h2 class="section-title" id="contact-heading">Contact</h2>
+        <p class="section-desc" id="contact-intro"></p>
+        <div class="contact-container">
+            <form id="contact-form">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" required placeholder="Your name">
                 </div>
-            </div>
-        </nav>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <input type="text" id="subject" name="subject" placeholder="Subject">
+                </div>
+                <div class="form-group">
+                    <label for="body">Message</label>
+                    <textarea id="body" name="body" rows="4" placeholder="Your message..."></textarea>
+                </div>
+                <button type="submit" class="btn contact-submit">Send message</button>
+                <div id="form-feedback"></div>
+            </form>
+        </div>
+    </section>
 
-        <!-- Hero Section -->
-        <header class="hero" id="hero-section">
-            <h1>DJ JAGGER</h1>
-            <p class="genres">TECHNO / TECH-HOUSE / MELODIC</p>
-            <a href="#gigs" class="btn">View Tour Dates</a>
-        </header>
+    <footer>
+        <p id="footer-text">&nbsp;</p>
+        <p style="margin-top: 12px;"><a href="/admin" class="admin-link">Admin</a></p>
+    </footer>
 
-        <!-- Gigs Section -->
-        <section id="gigs" class="gigs-section">
-            <h2 class="section-title">Upcoming <span>Gigs</span></h2>
-            <div id="gigs-container" class="gigs-container">
-                <div>[ Loading Data... ]</div>
-            </div>
-        </section>
+    <script>
+        const API = '';
 
-        <!-- Booking Section -->
-        <section id="booking" class="gigs-section" style="background-color: var(--page-bg);">
-            <h2 class="section-title">Book <span>DJ JAGGER</span></h2>
-            <div class="booking-container">
-                <form id="booking-form">
-                    <div class="form-group">
-                        <label for="name">Name</label>
-                        <input type="text" id="name" name="name" required placeholder="Your Name">
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" name="email" required placeholder="your.email@example.com">
-                    </div>
-                    <div class="form-group">
-                        <label for="event_details">Event Details</label>
-                        <input type="text" id="event_details" name="event_details" placeholder="Date, Location, Venue">
-                    </div>
-                    <div class="form-group">
-                        <label for="message">Message</label>
-                        <textarea id="message" name="message" rows="4" placeholder="Tell us more about your event..."></textarea>
-                    </div>
-                    <button type="submit" class="btn booking-submit">Send Request</button>
-                    <div id="form-feedback"></div>
-                </form>
-            </div>
-        </section>
-
-        <footer class="social-footer">
-            <p style="color: #666; font-size: 0.9rem;">&copy; 2024 DJ JAGGER. All rights reserved.</p>
-        </footer>
-    </div>
-</div>
-<!-- Admin Link at bottom -->
-<a href="/admin" class="secret-login">Admin Login</a>
-
-<script>
-    const API_URL = '/api';
-
-    // Utility to prevent XSS (Defense in Depth)
-    function escapeHtml(unsafe) {
-        if (!unsafe) return '';
-        return unsafe
-            .toString()
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
-
-    async function fetchGigs() {
-        const container = document.getElementById('gigs-container');
-        try {
-            const response = await fetch(`${API_URL}/gigs`);
-            const data = await response.json();
-
-            if (data.length === 0) {
-                container.innerHTML = '<div>No upcoming gigs currently listed.</div>';
-                return;
-            }
-
-            let html = '';
-            data.forEach(gig => {
-                html += `
-                <div class="gig-card">
-                    <div class="gig-date">${escapeHtml(gig.date)}</div>
-                    <div class="gig-location">${escapeHtml(gig.location)}</div>
-                    ${gig.genre ? `<div class="gig-genre">${escapeHtml(gig.genre)}</div>` : ''}
-                    ${gig.ticket_link ? `<a href="${escapeHtml(gig.ticket_link)}" target="_blank" class="btn" style="min-width: auto; padding: 8px 20px; font-size: 0.8rem;">Tickets</a>` : ''}
-                </div>`;
-            });
-            container.innerHTML = html;
-        } catch (error) {
-            container.innerHTML = '<div style="color:red;">Error loading gigs.</div>';
+        function escapeHtml(unsafe) {
+            if (unsafe === null || unsafe === undefined) return '';
+            return unsafe.toString()
+                .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
-    }
 
-    document.getElementById('booking-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const feedback = document.getElementById('form-feedback');
-        feedback.innerText = 'Sending request...';
-        feedback.style.color = 'var(--primary-color)';
+        function applyBranding(site) {
+            document.documentElement.style.setProperty('--primary-color', site.primary_color || '#ff3366');
+            document.documentElement.style.setProperty('--secondary-color', site.secondary_color || '#7b2cbf');
+            document.documentElement.style.setProperty('--hero-bg', `url('${(site.hero_bg || '').replace(/'/g, "%27")}')`);
 
-        const formData = {
-            name: document.getElementById('name').value,
-            email: document.getElementById('email').value,
-            event_details: document.getElementById('event_details').value,
-            message: document.getElementById('message').value,
-        };
+            document.title = site.site_name || 'Website';
+            document.getElementById('nav-logo').textContent = site.logo_text || site.site_name || '';
+            document.getElementById('hero-title').textContent = site.hero_title || site.site_name || '';
+            document.getElementById('hero-subtitle').textContent = site.hero_subtitle || site.tagline || '';
+            document.getElementById('hero-cta').textContent = site.hero_cta_label || 'Contact';
+            document.getElementById('nav-cta').textContent = site.hero_cta_label || 'Contact';
+            document.getElementById('contact-heading').textContent = site.contact_heading || 'Contact';
+            document.getElementById('contact-intro').textContent = site.contact_intro || '';
+            document.getElementById('footer-text').textContent = site.footer_text || '';
+        }
 
-        try {
-            const response = await fetch(`${API_URL}/booking`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+        function buildNav(types) {
+            const nav = document.getElementById('nav-links');
+            const cta = document.getElementById('nav-cta');
+            types.forEach(t => {
+                const a = document.createElement('a');
+                a.href = '#type-' + t.slug;
+                a.textContent = t.name;
+                nav.insertBefore(a, cta);
             });
-            const result = await response.json();
+        }
 
-            if (response.ok || response.status === 201) {
-                feedback.innerText = result.message;
-                feedback.style.color = '#0f0'; // Success green
-                document.getElementById('booking-form').reset();
-            } else {
-                feedback.innerText = result.error || 'Failed to send request.';
+        function renderFieldValue(field, value) {
+            if (value === '' || value === null || value === undefined) return '';
+            switch (field.type) {
+                case 'image': return '';  // handled separately
+                case 'url':
+                    return `<a href="${escapeHtml(value)}" target="_blank" rel="noopener" class="btn">${escapeHtml(field.label)}</a>`;
+                case 'date': {
+                    const d = new Date(value);
+                    const text = isNaN(d) ? value : d.toLocaleDateString();
+                    return `<div class="card-field"><span class="lbl">${escapeHtml(field.label)}</span>${escapeHtml(text)}</div>`;
+                }
+                case 'boolean':
+                    return `<div class="card-field"><span class="lbl">${escapeHtml(field.label)}</span>${value ? 'Yes' : 'No'}</div>`;
+                case 'textarea':
+                    return `<div class="card-field"><span class="lbl">${escapeHtml(field.label)}</span>${escapeHtml(value).replace(/\n/g, '<br>')}</div>`;
+                default:
+                    return `<div class="card-field"><span class="lbl">${escapeHtml(field.label)}</span>${escapeHtml(value)}</div>`;
+            }
+        }
+
+        function renderEntry(type, entry) {
+            const data = entry.data || {};
+            const fields = type.fields || [];
+
+            const imageField = fields.find(f => f.type === 'image' && data[f.name]);
+            const titleField = fields.find(f => f.name === 'title') || fields.find(f => f.type === 'text');
+            const title = titleField ? data[titleField.name] : '';
+
+            let inner = '';
+            if (imageField) inner += `<img src="${escapeHtml(data[imageField.name])}" alt="${escapeHtml(title)}" loading="lazy">`;
+            inner += '<div class="card-body">';
+            if (title) inner += `<div class="card-title">${escapeHtml(title)}</div>`;
+            fields.forEach(f => {
+                if (f === imageField || f === titleField) return;
+                inner += renderFieldValue(f, data[f.name]);
+            });
+            inner += '</div>';
+            return `<div class="card">${inner}</div>`;
+        }
+
+        async function renderContentSections(types) {
+            const container = document.getElementById('content-sections');
+            for (const type of types) {
+                const section = document.createElement('section');
+                section.className = 'block';
+                section.id = 'type-' + type.slug;
+                section.innerHTML = `
+                    <h2 class="section-title">${escapeHtml(type.name)}</h2>
+                    ${type.description ? `<p class="section-desc">${escapeHtml(type.description)}</p>` : ''}
+                    <div class="cards" data-slug="${escapeHtml(type.slug)}"><div class="empty">Loading…</div></div>`;
+                container.appendChild(section);
+
+                try {
+                    const res = await fetch(`${API}/api/content/${encodeURIComponent(type.slug)}`);
+                    const entries = await res.json();
+                    const target = section.querySelector('.cards');
+                    if (!Array.isArray(entries) || entries.length === 0) {
+                        section.style.display = 'none';   // hide empty sections
+                        continue;
+                    }
+                    target.innerHTML = entries.map(e => renderEntry(type, e)).join('');
+                } catch (err) {
+                    section.querySelector('.cards').innerHTML = '<div class="empty">Could not load content.</div>';
+                }
+            }
+        }
+
+        document.getElementById('contact-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const feedback = document.getElementById('form-feedback');
+            feedback.textContent = 'Sending...';
+            feedback.style.color = 'var(--primary-color)';
+
+            const payload = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                subject: document.getElementById('subject').value,
+                body: document.getElementById('body').value,
+            };
+            try {
+                const res = await fetch(`${API}/api/messages`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+                if (res.ok || res.status === 201) {
+                    feedback.textContent = result.message || 'Message sent.';
+                    feedback.style.color = '#0f0';
+                    e.target.reset();
+                } else {
+                    feedback.textContent = result.error || 'Failed to send.';
+                    feedback.style.color = 'red';
+                }
+            } catch (err) {
+                feedback.textContent = 'Network error. Please try again later.';
                 feedback.style.color = 'red';
             }
-        } catch (error) {
-            feedback.innerText = 'Network error. Please try again later.';
-            feedback.style.color = 'red';
-        }
-    });
+        });
 
-    async function fetchSettings() {
-        try {
-            const response = await fetch(`${API_URL}/settings`);
-            const settings = await response.json();
-            if (settings.hero_bg) {
-                document.getElementById('hero-section').style.backgroundImage = `linear-gradient(to bottom, rgba(5, 5, 5, 0.35), rgba(5, 5, 5, 0.92)), url('${escapeHtml(settings.hero_bg)}')`;
+        async function init() {
+            try {
+                const res = await fetch(`${API}/api/config`);
+                const cfg = await res.json();
+                applyBranding(cfg.site || {});
+                buildNav(cfg.contentTypes || []);
+                await renderContentSections(cfg.contentTypes || []);
+            } catch (err) {
+                document.getElementById('hero-title').textContent = 'Configuration error';
+                console.error(err);
             }
-        } catch (error) {
-            console.error("Failed to load settings", error);
         }
-    }
 
-    // Initialize
-    fetchSettings();
-    fetchGigs();
-</script>
+        init();
+    </script>
 </body>
 </html>
