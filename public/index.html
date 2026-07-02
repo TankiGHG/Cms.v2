@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loading…</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600;900&display=swap" rel="stylesheet">
+    <title>{{PAGE_TITLE}}</title>
+    <meta name="description" content="{{PAGE_DESC}}">
+    <meta property="og:title" content="{{PAGE_TITLE}}">
+    <meta property="og:description" content="{{PAGE_DESC}}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{PAGE_URL}}">
     <style>
         html { overflow-x: clip; max-width: 100%; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
         @supports not (overflow: clip) { html { overflow-x: hidden; } }
@@ -18,7 +22,11 @@
             --section-pad-y: clamp(48px, 10vw, 100px);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; scroll-behavior: smooth; }
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            scroll-behavior: smooth;
+        }
 
         body {
             min-height: 100vh; min-height: 100dvh;
@@ -55,6 +63,7 @@
             padding: max(24px, env(safe-area-inset-top, 0px)) var(--page-pad-x) 32px;
             background: linear-gradient(to bottom, rgba(5,5,5,0.35), rgba(5,5,5,0.92)), var(--hero-bg) center/cover;
         }
+        .hero.compact { min-height: 45vh; }
         .hero h1 {
             font-size: clamp(1.85rem, 6.5vw + 0.5rem, 5rem); font-weight: 900;
             letter-spacing: clamp(0.5px, 0.55vw, 6px); text-transform: uppercase;
@@ -109,10 +118,29 @@
         .card img { width: 100%; height: 180px; object-fit: cover; display: block; }
         .card-body { padding: clamp(16px, 4vw, 22px); display: flex; flex-direction: column; gap: 8px; }
         .card-title { font-size: 1.2rem; font-weight: 900; }
+        .card-title a { color: #fff; text-decoration: none; }
+        .card-title a:hover { color: var(--primary-color); }
         .card-field { font-size: 0.92rem; color: #ccc; overflow-wrap: anywhere; }
         .card-field .lbl { color: var(--primary-color); font-weight: 600; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 1px; display: block; }
         .card .btn { align-self: flex-start; padding: 8px 18px; font-size: 0.8rem; margin-top: 6px; }
         .empty { color: #888; padding: 0 var(--page-pad-x); }
+        .load-more-wrap { margin-top: clamp(20px, 4vw, 32px); }
+
+        /* Detail view */
+        .detail-wrap {
+            max-width: 760px; margin: 0 auto; text-align: left;
+            padding: 0 var(--page-pad-x);
+        }
+        .detail-wrap img.detail-img { width: 100%; border-radius: 15px; margin-bottom: 24px; }
+        .detail-wrap .md { color: #ddd; line-height: 1.7; }
+        .md h1, .md h2, .md h3 { margin: 1.2em 0 0.5em; line-height: 1.25; }
+        .md p { margin: 0 0 1em; }
+        .md ul, .md ol { margin: 0 0 1em 1.4em; }
+        .md a { color: var(--primary-color); }
+        .md code { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 5px; padding: 1px 6px; font-family: ui-monospace, monospace; font-size: 0.9em; }
+        .md blockquote { border-left: 3px solid var(--primary-color); padding-left: 14px; color: #aaa; margin: 0 0 1em; }
+        .back-link { display: inline-block; margin-bottom: 24px; color: #aaa; text-decoration: none; }
+        .back-link:hover { color: var(--primary-color); }
 
         /* Contact form */
         .contact-container {
@@ -130,6 +158,9 @@
         .contact-submit { width: 100%; margin-top: 4px; }
         #form-feedback { margin-top: 18px; font-weight: bold; }
 
+        /* Honeypot: keep the field out of sight for humans, visible to bots. */
+        .hp-field { position: absolute; left: -9999px; top: -9999px; height: 1px; width: 1px; overflow: hidden; }
+
         @keyframes pulseGlow {
             0% { text-shadow: 0 0 8px rgba(255, 51, 102, 0.35); }
             100% { text-shadow: 0 0 20px rgba(255, 51, 102, 0.75), 0 0 6px rgba(255, 255, 255, 0.35); }
@@ -144,9 +175,9 @@
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <a href="#" class="nav-logo" id="nav-logo">…</a>
+            <a href="/" class="nav-logo" id="nav-logo">…</a>
             <div class="nav-links" id="nav-links">
-                <a href="#contact" class="btn nav-btn" id="nav-cta">Contact</a>
+                <a href="/#contact" class="btn nav-btn" id="nav-cta">Contact</a>
             </div>
         </div>
     </nav>
@@ -154,7 +185,7 @@
     <header class="hero" id="hero">
         <h1 id="hero-title">…</h1>
         <p class="tagline" id="hero-subtitle"></p>
-        <a href="#contact" class="btn" id="hero-cta">Contact</a>
+        <a href="/#contact" class="btn" id="hero-cta">Contact</a>
     </header>
 
     <main id="content-sections"></main>
@@ -166,19 +197,23 @@
             <form id="contact-form">
                 <div class="form-group">
                     <label for="name">Name</label>
-                    <input type="text" id="name" name="name" required placeholder="Your name">
+                    <input type="text" id="name" name="name" required maxlength="200" placeholder="Your name">
                 </div>
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+                    <input type="email" id="email" name="email" required maxlength="200" placeholder="your.email@example.com">
                 </div>
                 <div class="form-group">
                     <label for="subject">Subject</label>
-                    <input type="text" id="subject" name="subject" placeholder="Subject">
+                    <input type="text" id="subject" name="subject" maxlength="300" placeholder="Subject">
                 </div>
                 <div class="form-group">
                     <label for="body">Message</label>
-                    <textarea id="body" name="body" rows="4" placeholder="Your message..."></textarea>
+                    <textarea id="body" name="body" rows="4" maxlength="10000" placeholder="Your message..."></textarea>
+                </div>
+                <div class="hp-field" aria-hidden="true">
+                    <label for="website">Website</label>
+                    <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
                 </div>
                 <button type="submit" class="btn contact-submit">Send message</button>
                 <div id="form-feedback"></div>
@@ -191,155 +226,6 @@
         <p style="margin-top: 12px;"><a href="/admin" class="admin-link">Admin</a></p>
     </footer>
 
-    <script>
-        const API = '';
-
-        function escapeHtml(unsafe) {
-            if (unsafe === null || unsafe === undefined) return '';
-            return unsafe.toString()
-                .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-        }
-
-        function applyBranding(site) {
-            document.documentElement.style.setProperty('--primary-color', site.primary_color || '#ff3366');
-            document.documentElement.style.setProperty('--secondary-color', site.secondary_color || '#7b2cbf');
-            document.documentElement.style.setProperty('--hero-bg', `url('${(site.hero_bg || '').replace(/'/g, "%27")}')`);
-
-            document.title = site.site_name || 'Website';
-            document.getElementById('nav-logo').textContent = site.logo_text || site.site_name || '';
-            document.getElementById('hero-title').textContent = site.hero_title || site.site_name || '';
-            document.getElementById('hero-subtitle').textContent = site.hero_subtitle || site.tagline || '';
-            document.getElementById('hero-cta').textContent = site.hero_cta_label || 'Contact';
-            document.getElementById('nav-cta').textContent = site.hero_cta_label || 'Contact';
-            document.getElementById('contact-heading').textContent = site.contact_heading || 'Contact';
-            document.getElementById('contact-intro').textContent = site.contact_intro || '';
-            document.getElementById('footer-text').textContent = site.footer_text || '';
-        }
-
-        function buildNav(types) {
-            const nav = document.getElementById('nav-links');
-            const cta = document.getElementById('nav-cta');
-            types.forEach(t => {
-                const a = document.createElement('a');
-                a.href = '#type-' + t.slug;
-                a.textContent = t.name;
-                nav.insertBefore(a, cta);
-            });
-        }
-
-        function renderFieldValue(field, value) {
-            if (value === '' || value === null || value === undefined) return '';
-            switch (field.type) {
-                case 'image': return '';  // handled separately
-                case 'url':
-                    return `<a href="${escapeHtml(value)}" target="_blank" rel="noopener" class="btn">${escapeHtml(field.label)}</a>`;
-                case 'date': {
-                    const d = new Date(value);
-                    const text = isNaN(d) ? value : d.toLocaleDateString();
-                    return `<div class="card-field"><span class="lbl">${escapeHtml(field.label)}</span>${escapeHtml(text)}</div>`;
-                }
-                case 'boolean':
-                    return `<div class="card-field"><span class="lbl">${escapeHtml(field.label)}</span>${value ? 'Yes' : 'No'}</div>`;
-                case 'textarea':
-                    return `<div class="card-field"><span class="lbl">${escapeHtml(field.label)}</span>${escapeHtml(value).replace(/\n/g, '<br>')}</div>`;
-                default:
-                    return `<div class="card-field"><span class="lbl">${escapeHtml(field.label)}</span>${escapeHtml(value)}</div>`;
-            }
-        }
-
-        function renderEntry(type, entry) {
-            const data = entry.data || {};
-            const fields = type.fields || [];
-
-            const imageField = fields.find(f => f.type === 'image' && data[f.name]);
-            const titleField = fields.find(f => f.name === 'title') || fields.find(f => f.type === 'text');
-            const title = titleField ? data[titleField.name] : '';
-
-            let inner = '';
-            if (imageField) inner += `<img src="${escapeHtml(data[imageField.name])}" alt="${escapeHtml(title)}" loading="lazy">`;
-            inner += '<div class="card-body">';
-            if (title) inner += `<div class="card-title">${escapeHtml(title)}</div>`;
-            fields.forEach(f => {
-                if (f === imageField || f === titleField) return;
-                inner += renderFieldValue(f, data[f.name]);
-            });
-            inner += '</div>';
-            return `<div class="card">${inner}</div>`;
-        }
-
-        async function renderContentSections(types) {
-            const container = document.getElementById('content-sections');
-            for (const type of types) {
-                const section = document.createElement('section');
-                section.className = 'block';
-                section.id = 'type-' + type.slug;
-                section.innerHTML = `
-                    <h2 class="section-title">${escapeHtml(type.name)}</h2>
-                    ${type.description ? `<p class="section-desc">${escapeHtml(type.description)}</p>` : ''}
-                    <div class="cards" data-slug="${escapeHtml(type.slug)}"><div class="empty">Loading…</div></div>`;
-                container.appendChild(section);
-
-                try {
-                    const res = await fetch(`${API}/api/content/${encodeURIComponent(type.slug)}`);
-                    const entries = await res.json();
-                    const target = section.querySelector('.cards');
-                    if (!Array.isArray(entries) || entries.length === 0) {
-                        section.style.display = 'none';   // hide empty sections
-                        continue;
-                    }
-                    target.innerHTML = entries.map(e => renderEntry(type, e)).join('');
-                } catch (err) {
-                    section.querySelector('.cards').innerHTML = '<div class="empty">Could not load content.</div>';
-                }
-            }
-        }
-
-        document.getElementById('contact-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const feedback = document.getElementById('form-feedback');
-            feedback.textContent = 'Sending...';
-            feedback.style.color = 'var(--primary-color)';
-
-            const payload = {
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                subject: document.getElementById('subject').value,
-                body: document.getElementById('body').value,
-            };
-            try {
-                const res = await fetch(`${API}/api/messages`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-                });
-                const result = await res.json();
-                if (res.ok || res.status === 201) {
-                    feedback.textContent = result.message || 'Message sent.';
-                    feedback.style.color = '#0f0';
-                    e.target.reset();
-                } else {
-                    feedback.textContent = result.error || 'Failed to send.';
-                    feedback.style.color = 'red';
-                }
-            } catch (err) {
-                feedback.textContent = 'Network error. Please try again later.';
-                feedback.style.color = 'red';
-            }
-        });
-
-        async function init() {
-            try {
-                const res = await fetch(`${API}/api/config`);
-                const cfg = await res.json();
-                applyBranding(cfg.site || {});
-                buildNav(cfg.contentTypes || []);
-                await renderContentSections(cfg.contentTypes || []);
-            } catch (err) {
-                document.getElementById('hero-title').textContent = 'Configuration error';
-                console.error(err);
-            }
-        }
-
-        init();
-    </script>
+    <script src="/app.js"></script>
 </body>
 </html>

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
     <title>CMS – Admin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-color: #ff3366;
@@ -14,17 +14,23 @@
             --surface: #141414;
             --border: #2a2a2a;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
         body { background: var(--bg); color: #eee; min-height: 100vh; }
 
         header.top {
             display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
-            padding: 18px 24px; background: var(--surface); border-bottom: 1px solid var(--border);
+            padding: 14px 24px; background: var(--surface); border-bottom: 1px solid var(--border);
             position: sticky; top: 0; z-index: 50;
         }
-        header.top h1 { font-size: 1.2rem; letter-spacing: 2px; text-transform: uppercase; }
-        header.top a { color: #888; text-decoration: none; font-size: 0.85rem; }
-        header.top a:hover { color: var(--primary-color); }
+        header.top h1 { font-size: 1.1rem; letter-spacing: 2px; text-transform: uppercase; }
+        header.top .meta { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+        header.top a, header.top button.link {
+            color: #888; text-decoration: none; font-size: 0.85rem; background: none; border: none; cursor: pointer;
+        }
+        header.top a:hover, header.top button.link:hover { color: var(--primary-color); }
+        .user-badge { color: #aaa; font-size: 0.82rem; }
+        .user-badge .role { color: var(--primary-color); text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; }
 
         .tabs { display: flex; gap: 4px; flex-wrap: wrap; padding: 14px 24px 0; background: var(--surface); border-bottom: 1px solid var(--border); }
         .tab {
@@ -33,6 +39,7 @@
         }
         .tab:hover { color: #fff; }
         .tab.active { color: #fff; border-bottom-color: var(--primary-color); }
+        body.role-editor .admin-only { display: none !important; }
 
         main { max-width: 1000px; margin: 0 auto; padding: 28px 24px 60px; }
         .panel { display: none; }
@@ -46,6 +53,7 @@
             width: 100%; background: #0e0e0e; border: 1px solid var(--border); padding: 11px;
             border-radius: 8px; color: #fff; font-family: inherit; font-size: 0.95rem; margin-bottom: 14px;
         }
+        input[type=color] { padding: 4px; height: 42px; }
         input:focus, textarea:focus, select:focus { outline: none; border-color: var(--primary-color); }
         .row { display: flex; gap: 12px; flex-wrap: wrap; }
         .row > div { flex: 1 1 140px; }
@@ -61,6 +69,7 @@
         .btn-danger:hover { background: var(--danger-color); }
         .btn-muted { border-color: #555; }
         .btn-muted:hover { background: #555; }
+        .btn[disabled] { opacity: 0.4; cursor: not-allowed; }
 
         table { width: 100%; border-collapse: collapse; }
         th, td { text-align: left; padding: 10px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 0.9rem; }
@@ -76,84 +85,132 @@
         .field-builder-row label.chk { display: flex; align-items: center; gap: 5px; margin: 0; color: #bbb; white-space: nowrap; }
         .field-builder-row input[type=checkbox] { width: auto; margin: 0; }
 
+        .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+        .toolbar > div { flex: 1 1 160px; }
+        .toolbar input, .toolbar select { margin-bottom: 0; }
+        .pager { display: flex; gap: 8px; align-items: center; margin-top: 12px; }
+        .pager .muted { font-size: 0.82rem; }
+
+        .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+        .media-item { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: #0e0e0e; }
+        .media-item img { width: 100%; height: 110px; object-fit: cover; display: block; }
+        .media-item .info { padding: 8px; font-size: 0.72rem; color: #999; word-break: break-all; }
+        .media-item .actions { padding: 0 8px 8px; }
+
         /* Modal */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100; align-items: center; justify-content: center; padding: 16px; }
         .modal.open { display: flex; }
-        .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; }
+        .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; width: 100%; max-width: 640px; max-height: 90vh; overflow-y: auto; }
         .modal-box h3 { margin-bottom: 16px; }
+        .version-item { border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 8px; }
+        .version-item pre { font-size: 0.75rem; color: #aaa; white-space: pre-wrap; word-break: break-word; margin: 6px 0; max-height: 140px; overflow: auto; }
     </style>
 </head>
 <body>
     <header class="top">
         <h1 id="admin-title">CMS Admin</h1>
-        <a href="/" target="_blank">View site ↗</a>
+        <div class="meta">
+            <span class="user-badge" id="user-badge"></span>
+            <button class="link" id="lang-toggle">DE</button>
+            <button class="link" id="pw-open" data-i18n="changePassword">Change password</button>
+            <a href="/" target="_blank" data-i18n="viewSite">View site ↗</a>
+            <button class="link" id="logout-btn" data-i18n="logout">Logout</button>
+        </div>
     </header>
 
     <div class="tabs">
-        <button class="tab active" data-tab="content">Content</button>
-        <button class="tab" data-tab="types">Content Types</button>
-        <button class="tab" data-tab="messages">Messages</button>
-        <button class="tab" data-tab="settings">Settings</button>
+        <button class="tab active" data-tab="content" data-i18n="tabContent">Content</button>
+        <button class="tab admin-only" data-tab="types" data-i18n="tabTypes">Content Types</button>
+        <button class="tab" data-tab="messages" data-i18n="tabMessages">Messages</button>
+        <button class="tab" data-tab="media" data-i18n="tabMedia">Media</button>
+        <button class="tab admin-only" data-tab="users" data-i18n="tabUsers">Users</button>
+        <button class="tab admin-only" data-tab="settings" data-i18n="tabSettings">Settings</button>
     </div>
 
     <main>
         <!-- CONTENT -->
         <section class="panel active" id="panel-content">
             <div class="card">
-                <label for="type-select">Content type</label>
-                <select id="type-select"></select>
+                <div class="toolbar">
+                    <div>
+                        <label for="type-select" data-i18n="contentType">Content type</label>
+                        <select id="type-select"></select>
+                    </div>
+                    <div>
+                        <label for="entry-search" data-i18n="search">Search</label>
+                        <input type="search" id="entry-search" placeholder="Search…">
+                    </div>
+                    <div>
+                        <label for="entry-filter" data-i18n="filter">Filter</label>
+                        <select id="entry-filter">
+                            <option value="" data-i18n="filterAll">All</option>
+                            <option value="published" data-i18n="filterPublished">Published</option>
+                            <option value="draft" data-i18n="filterDraft">Drafts</option>
+                            <option value="trash" data-i18n="filterTrash">Trash</option>
+                        </select>
+                    </div>
+                </div>
             </div>
-            <div class="card">
-                <h2 class="sec" id="entry-form-title">New entry</h2>
+            <div class="card" id="entry-form-card">
+                <h2 class="sec" id="entry-form-title" data-i18n="newEntry">New entry</h2>
                 <form id="entry-form">
                     <input type="hidden" id="entry-id">
                     <div id="entry-fields"></div>
-                    <div class="row" style="align-items:center;">
-                        <div style="flex:0 0 auto;">
-                            <label for="entry-status">Status</label>
-                            <select id="entry-status" style="width:auto;">
-                                <option value="published">Published</option>
-                                <option value="draft">Draft</option>
+                    <div class="row">
+                        <div>
+                            <label for="entry-status" data-i18n="status">Status</label>
+                            <select id="entry-status">
+                                <option value="published" data-i18n="statusPublished">Published</option>
+                                <option value="draft" data-i18n="statusDraft">Draft</option>
                             </select>
+                        </div>
+                        <div>
+                            <label for="entry-publish-at" data-i18n="publishAt">Publish at (optional)</label>
+                            <input type="datetime-local" id="entry-publish-at">
+                        </div>
+                        <div id="entry-locale-wrap" style="display:none;">
+                            <label for="entry-locale" data-i18n="locale">Language</label>
+                            <select id="entry-locale"></select>
                         </div>
                     </div>
                     <div class="actions">
-                        <button type="submit" class="btn">Save entry</button>
-                        <button type="button" class="btn btn-muted" id="entry-cancel" style="display:none;">Cancel edit</button>
+                        <button type="submit" class="btn" data-i18n="saveEntry">Save entry</button>
+                        <button type="button" class="btn btn-muted" id="entry-cancel" style="display:none;" data-i18n="cancelEdit">Cancel edit</button>
                     </div>
                     <div class="feedback" id="entry-feedback"></div>
                 </form>
             </div>
             <div class="card">
-                <h2 class="sec">Existing entries</h2>
+                <h2 class="sec" data-i18n="existingEntries">Existing entries</h2>
                 <div id="entries-list"></div>
+                <div class="pager" id="entries-pager"></div>
             </div>
         </section>
 
         <!-- CONTENT TYPES -->
         <section class="panel" id="panel-types">
             <div class="card">
-                <h2 class="sec" id="type-form-title">New content type</h2>
+                <h2 class="sec" id="type-form-title" data-i18n="newType">New content type</h2>
                 <form id="type-form">
                     <input type="hidden" id="type-id">
                     <div class="row">
-                        <div><label for="type-name">Name</label><input type="text" id="type-name" placeholder="Posts" required></div>
-                        <div><label for="type-slug">Slug</label><input type="text" id="type-slug" placeholder="posts" required></div>
+                        <div><label for="type-name" data-i18n="name">Name</label><input type="text" id="type-name" placeholder="Posts" required maxlength="100"></div>
+                        <div><label for="type-slug">Slug</label><input type="text" id="type-slug" placeholder="posts" required maxlength="64" pattern="[a-z0-9-]+"></div>
                     </div>
-                    <label for="type-desc">Description</label>
-                    <input type="text" id="type-desc" placeholder="Optional description">
-                    <label>Fields</label>
+                    <label for="type-desc" data-i18n="description">Description</label>
+                    <input type="text" id="type-desc" maxlength="500">
+                    <label data-i18n="fields">Fields</label>
                     <div id="field-builder"></div>
-                    <button type="button" class="btn btn-sm btn-muted" id="add-field" style="margin-bottom:14px;">+ Add field</button>
+                    <button type="button" class="btn btn-sm btn-muted" id="add-field" style="margin-bottom:14px;" data-i18n="addField">+ Add field</button>
                     <div class="actions">
-                        <button type="submit" class="btn">Save content type</button>
-                        <button type="button" class="btn btn-muted" id="type-cancel" style="display:none;">Cancel edit</button>
+                        <button type="submit" class="btn" data-i18n="saveType">Save content type</button>
+                        <button type="button" class="btn btn-muted" id="type-cancel" style="display:none;" data-i18n="cancelEdit">Cancel edit</button>
                     </div>
                     <div class="feedback" id="type-feedback"></div>
                 </form>
             </div>
             <div class="card">
-                <h2 class="sec">Existing content types</h2>
+                <h2 class="sec" data-i18n="existingTypes">Existing content types</h2>
                 <div id="types-list"></div>
             </div>
         </section>
@@ -161,20 +218,86 @@
         <!-- MESSAGES -->
         <section class="panel" id="panel-messages">
             <div class="card">
-                <h2 class="sec">Inbox</h2>
+                <div class="toolbar">
+                    <div>
+                        <label for="msg-filter" data-i18n="filter">Filter</label>
+                        <select id="msg-filter">
+                            <option value="" data-i18n="filterAll">All</option>
+                            <option value="new" data-i18n="msgNew">New</option>
+                            <option value="read" data-i18n="msgRead">Read</option>
+                            <option value="archived" data-i18n="msgArchived">Archived</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h2 class="sec" data-i18n="inbox">Inbox</h2>
                 <div id="messages-list"></div>
+                <div class="pager" id="messages-pager"></div>
+            </div>
+        </section>
+
+        <!-- MEDIA -->
+        <section class="panel" id="panel-media">
+            <div class="card">
+                <h2 class="sec" data-i18n="uploadImage">Upload image</h2>
+                <input type="file" id="media-upload" accept="image/jpeg,image/png,image/gif,image/webp,image/avif">
+                <div class="feedback" id="media-feedback"></div>
+            </div>
+            <div class="card">
+                <h2 class="sec" data-i18n="mediaLibrary">Media library</h2>
+                <div class="media-grid" id="media-grid"></div>
+            </div>
+        </section>
+
+        <!-- USERS -->
+        <section class="panel" id="panel-users">
+            <div class="card">
+                <h2 class="sec" data-i18n="newUser">New user</h2>
+                <form id="user-form">
+                    <div class="row">
+                        <div><label for="user-name" data-i18n="username">Username</label><input type="text" id="user-name" required minlength="3" maxlength="50"></div>
+                        <div><label for="user-pass" data-i18n="password">Password</label><input type="password" id="user-pass" required minlength="8" autocomplete="new-password"></div>
+                        <div>
+                            <label for="user-role" data-i18n="role">Role</label>
+                            <select id="user-role">
+                                <option value="editor">Editor</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn" data-i18n="createUser">Create user</button>
+                    <div class="feedback" id="user-feedback"></div>
+                </form>
+            </div>
+            <div class="card">
+                <h2 class="sec" data-i18n="existingUsers">Users</h2>
+                <div id="users-list"></div>
             </div>
         </section>
 
         <!-- SETTINGS -->
         <section class="panel" id="panel-settings">
             <div class="card">
-                <h2 class="sec">Site settings</h2>
+                <h2 class="sec" data-i18n="siteSettings">Site settings</h2>
                 <form id="settings-form">
                     <div id="settings-fields"></div>
-                    <button type="submit" class="btn">Save settings</button>
+                    <button type="submit" class="btn" data-i18n="saveSettings">Save settings</button>
                     <div class="feedback" id="settings-feedback"></div>
                 </form>
+            </div>
+            <div class="card">
+                <h2 class="sec" data-i18n="backupExport">Backup & export</h2>
+                <div class="actions">
+                    <a class="btn btn-muted" href="/api/admin/export" download data-i18n="exportJson">Export content (JSON)</a>
+                    <a class="btn btn-muted" href="/api/admin/backup" download data-i18n="backupDb">Download DB backup</a>
+                    <button type="button" class="btn btn-danger" id="import-btn" data-i18n="importJson">Import content (JSON)</button>
+                    <input type="file" id="import-file" accept="application/json" style="display:none;">
+                </div>
+                <p class="muted" style="margin-top:10px; font-size:0.8rem;" data-i18n="importWarning">
+                    Import replaces all content types and entries with the file contents.
+                </p>
+                <div class="feedback" id="import-feedback"></div>
             </div>
         </section>
     </main>
@@ -182,452 +305,53 @@
     <!-- Reply modal -->
     <div class="modal" id="reply-modal">
         <div class="modal-box">
-            <h3>Reply to message</h3>
+            <h3 data-i18n="replyTitle">Reply to message</h3>
             <p class="muted" id="reply-info" style="margin-bottom:14px; font-size:0.85rem;"></p>
             <form id="reply-form">
                 <input type="hidden" id="reply-id">
-                <input type="hidden" id="reply-email">
-                <label for="reply-subject">Subject</label>
-                <input type="text" id="reply-subject">
-                <label for="reply-message">Message</label>
-                <textarea id="reply-message" rows="6" required></textarea>
+                <label for="reply-subject" data-i18n="subject">Subject</label>
+                <input type="text" id="reply-subject" maxlength="300">
+                <label for="reply-message" data-i18n="message">Message</label>
+                <textarea id="reply-message" rows="6" required maxlength="10000"></textarea>
                 <div class="actions">
-                    <button type="submit" class="btn">Send email</button>
-                    <button type="button" class="btn btn-muted" id="reply-cancel">Cancel</button>
+                    <button type="submit" class="btn" data-i18n="sendEmail">Send email</button>
+                    <button type="button" class="btn btn-muted" id="reply-cancel" data-i18n="cancel">Cancel</button>
                 </div>
                 <div class="feedback" id="reply-feedback"></div>
             </form>
         </div>
     </div>
 
-    <script>
-        const API = '/api/admin';
+    <!-- Versions modal -->
+    <div class="modal" id="versions-modal">
+        <div class="modal-box">
+            <h3 data-i18n="versionsTitle">Entry versions</h3>
+            <div id="versions-list"></div>
+            <div class="actions" style="margin-top:12px;">
+                <button type="button" class="btn btn-muted" id="versions-close" data-i18n="close">Close</button>
+            </div>
+            <div class="feedback" id="versions-feedback"></div>
+        </div>
+    </div>
 
-        // ---- state ----
-        let contentTypes = [];      // [{id, slug, name, description, fields, entryCount}]
-        let siteSchema = [];
-        let currentTypeSlug = null;
+    <!-- Change password modal -->
+    <div class="modal" id="pw-modal">
+        <div class="modal-box">
+            <h3 data-i18n="changePassword">Change password</h3>
+            <form id="pw-form">
+                <label for="pw-current" data-i18n="currentPassword">Current password</label>
+                <input type="password" id="pw-current" required autocomplete="current-password">
+                <label for="pw-new" data-i18n="newPassword">New password (min. 8 characters)</label>
+                <input type="password" id="pw-new" required minlength="8" autocomplete="new-password">
+                <div class="actions">
+                    <button type="submit" class="btn" data-i18n="save">Save</button>
+                    <button type="button" class="btn btn-muted" id="pw-cancel" data-i18n="cancel">Cancel</button>
+                </div>
+                <div class="feedback" id="pw-feedback"></div>
+            </form>
+        </div>
+    </div>
 
-        function escapeHtml(unsafe) {
-            if (unsafe === null || unsafe === undefined) return '';
-            return unsafe.toString()
-                .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-        }
-        function setFeedback(el, msg, ok) {
-            el.textContent = msg;
-            el.style.color = ok === true ? 'var(--ok-color)' : ok === false ? 'var(--danger-color)' : '#fff';
-        }
-
-        // ---- tabs ----
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-                tab.classList.add('active');
-                document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
-                if (tab.dataset.tab === 'messages') loadMessages();
-            });
-        });
-
-        // =====================================================================
-        //  CONTENT TYPES  (definitions + field builder)
-        // =====================================================================
-        const fieldTypeOptions = ['text', 'textarea', 'number', 'date', 'url', 'image', 'boolean'];
-
-        function fieldBuilderRow(field = {}) {
-            const wrap = document.createElement('div');
-            wrap.className = 'field-builder-row';
-            wrap.innerHTML = `
-                <input type="text" class="fb-name" placeholder="name" value="${escapeHtml(field.name || '')}">
-                <input type="text" class="fb-label" placeholder="Label" value="${escapeHtml(field.label || '')}">
-                <select class="fb-type">${fieldTypeOptions.map(t => `<option value="${t}" ${field.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
-                <label class="chk"><input type="checkbox" class="fb-required" ${field.required ? 'checked' : ''}> req</label>
-                <button type="button" class="btn btn-sm btn-danger fb-remove">✕</button>`;
-            wrap.querySelector('.fb-remove').addEventListener('click', () => wrap.remove());
-            return wrap;
-        }
-
-        document.getElementById('add-field').addEventListener('click', () => {
-            document.getElementById('field-builder').appendChild(fieldBuilderRow());
-        });
-
-        function collectFields() {
-            const rows = document.querySelectorAll('#field-builder .field-builder-row');
-            const fields = [];
-            rows.forEach(r => {
-                const name = r.querySelector('.fb-name').value.trim();
-                if (!name) return;
-                fields.push({
-                    name,
-                    label: r.querySelector('.fb-label').value.trim() || name,
-                    type: r.querySelector('.fb-type').value,
-                    required: r.querySelector('.fb-required').checked
-                });
-            });
-            return fields;
-        }
-
-        function resetTypeForm() {
-            document.getElementById('type-id').value = '';
-            document.getElementById('type-name').value = '';
-            document.getElementById('type-slug').value = '';
-            document.getElementById('type-desc').value = '';
-            document.getElementById('field-builder').innerHTML = '';
-            document.getElementById('field-builder').appendChild(fieldBuilderRow());
-            document.getElementById('type-form-title').textContent = 'New content type';
-            document.getElementById('type-cancel').style.display = 'none';
-            setFeedback(document.getElementById('type-feedback'), '');
-        }
-
-        document.getElementById('type-cancel').addEventListener('click', resetTypeForm);
-
-        function editType(id) {
-            const t = contentTypes.find(x => x.id === id);
-            if (!t) return;
-            document.getElementById('type-id').value = t.id;
-            document.getElementById('type-name').value = t.name;
-            document.getElementById('type-slug').value = t.slug;
-            document.getElementById('type-desc').value = t.description || '';
-            const fb = document.getElementById('field-builder');
-            fb.innerHTML = '';
-            (t.fields || []).forEach(f => fb.appendChild(fieldBuilderRow(f)));
-            document.getElementById('type-form-title').textContent = 'Edit: ' + t.name;
-            document.getElementById('type-cancel').style.display = 'inline-block';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        async function deleteType(id) {
-            const t = contentTypes.find(x => x.id === id);
-            if (!confirm(`Delete content type "${t ? t.name : id}" and ALL its entries?`)) return;
-            const res = await fetch(`${API}/content-types/${id}`, { method: 'DELETE' });
-            if (res.ok) { await loadTypes(); } else { alert('Failed to delete.'); }
-        }
-
-        document.getElementById('type-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const feedback = document.getElementById('type-feedback');
-            const id = document.getElementById('type-id').value;
-            const payload = {
-                name: document.getElementById('type-name').value.trim(),
-                slug: document.getElementById('type-slug').value.trim(),
-                description: document.getElementById('type-desc').value.trim(),
-                fields: collectFields()
-            };
-            setFeedback(feedback, 'Saving...');
-            try {
-                const res = await fetch(id ? `${API}/content-types/${id}` : `${API}/content-types`, {
-                    method: id ? 'PUT' : 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const result = await res.json();
-                if (res.ok || res.status === 201) {
-                    setFeedback(feedback, 'Saved.', true);
-                    resetTypeForm();
-                    await loadTypes();
-                } else {
-                    setFeedback(feedback, result.error || 'Failed to save.', false);
-                }
-            } catch (err) { setFeedback(feedback, 'Network error.', false); }
-        });
-
-        function renderTypesList() {
-            const el = document.getElementById('types-list');
-            if (contentTypes.length === 0) { el.innerHTML = '<p class="muted">No content types yet.</p>'; return; }
-            el.innerHTML = contentTypes.map(t => `
-                <div class="list-item">
-                    <div>
-                        <strong>${escapeHtml(t.name)}</strong> <span class="muted">/${escapeHtml(t.slug)}</span><br>
-                        <span class="muted" style="font-size:0.82rem;">
-                            ${(t.fields || []).map(f => escapeHtml(f.name)).join(', ')} · ${t.entryCount || 0} entries
-                        </span>
-                    </div>
-                    <div class="actions">
-                        <button class="btn btn-sm btn-muted" data-edit-type="${t.id}">Edit</button>
-                        <button class="btn btn-sm btn-danger" data-del-type="${t.id}">Delete</button>
-                    </div>
-                </div>`).join('');
-            el.querySelectorAll('[data-edit-type]').forEach(b => b.addEventListener('click', () => editType(Number(b.dataset.editType))));
-            el.querySelectorAll('[data-del-type]').forEach(b => b.addEventListener('click', () => deleteType(Number(b.dataset.delType))));
-        }
-
-        async function loadTypes() {
-            const res = await fetch(`${API}/content-types`);
-            contentTypes = await res.json();
-            renderTypesList();
-            renderTypeSelect();
-        }
-
-        // =====================================================================
-        //  CONTENT ENTRIES
-        // =====================================================================
-        function renderTypeSelect() {
-            const sel = document.getElementById('type-select');
-            const prev = currentTypeSlug;
-            sel.innerHTML = contentTypes.map(t => `<option value="${escapeHtml(t.slug)}">${escapeHtml(t.name)}</option>`).join('');
-            if (contentTypes.length === 0) {
-                currentTypeSlug = null;
-                document.getElementById('entry-fields').innerHTML = '<p class="muted">Create a content type first.</p>';
-                document.getElementById('entries-list').innerHTML = '';
-                return;
-            }
-            currentTypeSlug = contentTypes.some(t => t.slug === prev) ? prev : contentTypes[0].slug;
-            sel.value = currentTypeSlug;
-            buildEntryForm();
-            loadEntries();
-        }
-
-        document.getElementById('type-select').addEventListener('change', (e) => {
-            currentTypeSlug = e.target.value;
-            resetEntryForm();
-            buildEntryForm();
-            loadEntries();
-        });
-
-        function currentType() { return contentTypes.find(t => t.slug === currentTypeSlug); }
-
-        function fieldInput(field, value = '') {
-            const id = 'ef-' + field.name;
-            const req = field.required ? 'required' : '';
-            let control;
-            switch (field.type) {
-                case 'textarea': control = `<textarea id="${id}" rows="4" ${req}>${escapeHtml(value)}</textarea>`; break;
-                case 'number':   control = `<input type="number" id="${id}" value="${escapeHtml(value)}" ${req}>`; break;
-                case 'date':     control = `<input type="date" id="${id}" value="${escapeHtml(value)}" ${req}>`; break;
-                case 'url':
-                case 'image':    control = `<input type="url" id="${id}" value="${escapeHtml(value)}" placeholder="https://…" ${req}>`; break;
-                case 'boolean':  control = `<input type="checkbox" id="${id}" style="width:auto;" ${value ? 'checked' : ''}>`; break;
-                default:         control = `<input type="text" id="${id}" value="${escapeHtml(value)}" ${req}>`;
-            }
-            return `<div><label for="${id}">${escapeHtml(field.label)}${field.required ? ' *' : ''}</label>${control}</div>`;
-        }
-
-        function buildEntryForm(values = {}) {
-            const type = currentType();
-            const container = document.getElementById('entry-fields');
-            if (!type) { container.innerHTML = ''; return; }
-            container.innerHTML = type.fields.map(f => fieldInput(f, values[f.name] !== undefined ? values[f.name] : '')).join('');
-        }
-
-        function collectEntryData() {
-            const type = currentType();
-            const data = {};
-            type.fields.forEach(f => {
-                const el = document.getElementById('ef-' + f.name);
-                if (!el) return;
-                data[f.name] = f.type === 'boolean' ? el.checked : el.value;
-            });
-            return data;
-        }
-
-        function resetEntryForm() {
-            document.getElementById('entry-id').value = '';
-            document.getElementById('entry-status').value = 'published';
-            document.getElementById('entry-form-title').textContent = 'New entry';
-            document.getElementById('entry-cancel').style.display = 'none';
-            setFeedback(document.getElementById('entry-feedback'), '');
-            buildEntryForm();
-        }
-
-        document.getElementById('entry-cancel').addEventListener('click', resetEntryForm);
-
-        function editEntry(entry) {
-            document.getElementById('entry-id').value = entry.id;
-            document.getElementById('entry-status').value = entry.status || 'published';
-            document.getElementById('entry-form-title').textContent = 'Edit entry #' + entry.id;
-            document.getElementById('entry-cancel').style.display = 'inline-block';
-            buildEntryForm(entry.data || {});
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        document.getElementById('entry-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const feedback = document.getElementById('entry-feedback');
-            const id = document.getElementById('entry-id').value;
-            const payload = { data: collectEntryData(), status: document.getElementById('entry-status').value };
-            setFeedback(feedback, 'Saving...');
-            try {
-                const url = id ? `${API}/content/${currentTypeSlug}/${id}` : `${API}/content/${currentTypeSlug}`;
-                const res = await fetch(url, {
-                    method: id ? 'PUT' : 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const result = await res.json();
-                if (res.ok || res.status === 201) {
-                    setFeedback(feedback, 'Saved.', true);
-                    resetEntryForm();
-                    loadEntries();
-                    loadTypes(); // refresh entry counts
-                } else {
-                    setFeedback(feedback, result.error || 'Failed to save.', false);
-                }
-            } catch (err) { setFeedback(feedback, 'Network error.', false); }
-        });
-
-        async function deleteEntry(id) {
-            if (!confirm('Delete this entry?')) return;
-            const res = await fetch(`${API}/content/${currentTypeSlug}/${id}`, { method: 'DELETE' });
-            if (res.ok) { loadEntries(); loadTypes(); } else { alert('Failed to delete.'); }
-        }
-
-        async function loadEntries() {
-            const list = document.getElementById('entries-list');
-            const type = currentType();
-            if (!type) { list.innerHTML = ''; return; }
-            list.innerHTML = '<p class="muted">Loading…</p>';
-            try {
-                const res = await fetch(`${API}/content/${currentTypeSlug}`);
-                const data = await res.json();
-                const entries = data.entries || [];
-                if (entries.length === 0) { list.innerHTML = '<p class="muted">No entries yet.</p>'; return; }
-                const titleField = type.fields.find(f => f.name === 'title') || type.fields.find(f => f.type === 'text') || type.fields[0];
-                list.innerHTML = entries.map(entry => {
-                    const title = titleField ? entry.data[titleField.name] : '';
-                    const color = entry.status === 'published' ? 'var(--ok-color)' : '#aaa';
-                    return `
-                        <div class="list-item">
-                            <div>
-                                <strong>${escapeHtml(title) || '(untitled)'}</strong>
-                                <span class="pill" style="color:${color}; border:1px solid ${color};">${escapeHtml(entry.status)}</span><br>
-                                <span class="muted" style="font-size:0.8rem;">#${entry.id} · ${new Date(entry.created_at).toLocaleString()}</span>
-                            </div>
-                            <div class="actions">
-                                <button class="btn btn-sm btn-muted" data-edit="${entry.id}">Edit</button>
-                                <button class="btn btn-sm btn-danger" data-del="${entry.id}">Delete</button>
-                            </div>
-                        </div>`;
-                }).join('');
-                list.querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', () => {
-                    editEntry(entries.find(x => x.id === Number(b.dataset.edit)));
-                }));
-                list.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => deleteEntry(Number(b.dataset.del))));
-            } catch (err) { list.innerHTML = '<p class="muted">Error loading entries.</p>'; }
-        }
-
-        // =====================================================================
-        //  MESSAGES
-        // =====================================================================
-        const replyModal = document.getElementById('reply-modal');
-
-        function openReply(id, name, email) {
-            document.getElementById('reply-id').value = id;
-            document.getElementById('reply-email').value = email;
-            document.getElementById('reply-info').textContent = `To: ${name} <${email}>`;
-            document.getElementById('reply-subject').value = 'Re: your message';
-            document.getElementById('reply-message').value = '';
-            setFeedback(document.getElementById('reply-feedback'), '');
-            replyModal.classList.add('open');
-        }
-        document.getElementById('reply-cancel').addEventListener('click', () => replyModal.classList.remove('open'));
-        replyModal.addEventListener('click', (e) => { if (e.target === replyModal) replyModal.classList.remove('open'); });
-
-        document.getElementById('reply-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const feedback = document.getElementById('reply-feedback');
-            setFeedback(feedback, 'Sending…');
-            try {
-                const res = await fetch(`${API}/messages/${document.getElementById('reply-id').value}/reply`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: document.getElementById('reply-email').value,
-                        subject: document.getElementById('reply-subject').value,
-                        replyMessage: document.getElementById('reply-message').value
-                    })
-                });
-                const result = await res.json();
-                if (res.ok) {
-                    setFeedback(feedback, 'Sent.', true);
-                    setTimeout(() => { replyModal.classList.remove('open'); loadMessages(); }, 1200);
-                } else {
-                    setFeedback(feedback, result.error || 'Failed to send.', false);
-                }
-            } catch (err) { setFeedback(feedback, 'Network error.', false); }
-        });
-
-        async function setMessageStatus(id, status) {
-            const res = await fetch(`${API}/messages/${id}/status`, {
-                method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status })
-            });
-            if (res.ok) loadMessages(); else alert('Failed to update.');
-        }
-        async function deleteMessage(id) {
-            if (!confirm('Delete this message?')) return;
-            const res = await fetch(`${API}/messages/${id}`, { method: 'DELETE' });
-            if (res.ok) loadMessages(); else alert('Failed to delete.');
-        }
-
-        async function loadMessages() {
-            const list = document.getElementById('messages-list');
-            list.innerHTML = '<p class="muted">Loading…</p>';
-            try {
-                const res = await fetch(`${API}/messages`);
-                const data = await res.json();
-                if (!Array.isArray(data) || data.length === 0) { list.innerHTML = '<p class="muted">No messages.</p>'; return; }
-                list.innerHTML = `<table><thead><tr><th>Date</th><th>From</th><th>Message</th><th>Status</th><th>Actions</th></tr></thead><tbody>${
-                    data.map(m => {
-                        const color = m.status === 'new' ? 'var(--primary-color)' : m.status === 'archived' ? '#888' : 'var(--ok-color)';
-                        return `<tr>
-                            <td style="white-space:nowrap;">${new Date(m.created_at).toLocaleDateString()}</td>
-                            <td><strong>${escapeHtml(m.name)}</strong><br><span class="muted" style="font-size:0.8rem;">${escapeHtml(m.email)}</span></td>
-                            <td><strong>${escapeHtml(m.subject || '')}</strong><br><span class="muted" style="font-size:0.82rem;">${escapeHtml(m.body || '')}</span></td>
-                            <td style="color:${color}; text-transform:uppercase; font-weight:600; font-size:0.75rem;">${escapeHtml(m.status)}</td>
-                            <td><div class="actions">
-                                <button class="btn btn-sm" data-reply="${m.id}" data-name="${escapeHtml(m.name)}" data-email="${escapeHtml(m.email)}">Reply</button>
-                                ${m.status !== 'read' ? `<button class="btn btn-sm btn-muted" data-status="read" data-id="${m.id}">Read</button>` : ''}
-                                ${m.status !== 'archived' ? `<button class="btn btn-sm btn-muted" data-status="archived" data-id="${m.id}">Archive</button>` : ''}
-                                <button class="btn btn-sm btn-danger" data-delmsg="${m.id}">Delete</button>
-                            </div></td>
-                        </tr>`;
-                    }).join('')
-                }</tbody></table>`;
-                list.querySelectorAll('[data-reply]').forEach(b => b.addEventListener('click', () => openReply(b.dataset.reply, b.dataset.name, b.dataset.email)));
-                list.querySelectorAll('[data-status]').forEach(b => b.addEventListener('click', () => setMessageStatus(b.dataset.id, b.dataset.status)));
-                list.querySelectorAll('[data-delmsg]').forEach(b => b.addEventListener('click', () => deleteMessage(b.dataset.delmsg)));
-            } catch (err) { list.innerHTML = '<p class="muted">Error loading messages.</p>'; }
-        }
-
-        // =====================================================================
-        //  SETTINGS
-        // =====================================================================
-        async function loadSettings() {
-            const res = await fetch(`${API}/settings`);
-            const data = await res.json();
-            siteSchema = data.schema || [];
-            const site = data.site || {};
-            document.getElementById('admin-title').textContent = (site.site_name || 'CMS') + ' Admin';
-            document.getElementById('settings-fields').innerHTML = siteSchema.map(f => {
-                const val = site[f.key] !== undefined ? site[f.key] : '';
-                const control = f.type === 'textarea'
-                    ? `<textarea id="set-${f.key}" rows="3">${escapeHtml(val)}</textarea>`
-                    : `<input type="${f.type === 'url' ? 'url' : 'text'}" id="set-${f.key}" value="${escapeHtml(val)}">`;
-                return `<label for="set-${f.key}">${escapeHtml(f.label)}</label>${control}`;
-            }).join('');
-        }
-
-        document.getElementById('settings-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const feedback = document.getElementById('settings-feedback');
-            setFeedback(feedback, 'Saving…');
-            try {
-                for (const f of siteSchema) {
-                    const value = document.getElementById('set-' + f.key).value;
-                    const res = await fetch(`${API}/settings`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ key: f.key, value })
-                    });
-                    if (!res.ok) throw new Error('Failed for ' + f.key);
-                }
-                setFeedback(feedback, 'Settings saved.', true);
-            } catch (err) { setFeedback(feedback, 'Failed to save some settings.', false); }
-        });
-
-        // ---- init ----
-        (async function init() {
-            await loadTypes();
-            await loadSettings();
-        })();
-    </script>
+    <script src="/admin/admin.js"></script>
 </body>
 </html>
